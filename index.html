@@ -132,6 +132,7 @@
                         class="text-[10px] font-mono px-2 py-0.5 border border-terminal-accent/30 text-terminal-accent rounded">INSTITUTIONAL
                         FEED</span>
                 </div>
+                <div id="plumbing-summary" class="mb-6"></div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="risk-matrix">
                     <!-- Dynamic Items (6 points) -->
                 </div>
@@ -306,6 +307,53 @@
                         </div>
                     </div>
                 `).join('');
+
+                // --- PLUMBING DYNAMIC SUMMARY ---
+                let plumbingConclusion = "";
+                let plumbingStatus = "STABLE";
+                let plumbingColor = "text-terminal-accent";
+
+                // Heuristic for systemic stress (higher is worse)
+                const stressScore = (
+                    (fred.hy_spread / 5) * 0.4 +
+                    ((fred.stress_index + 1) / 3) * 0.3 +
+                    (DATA.raw.market.tlt_vol / 20) * 0.3
+                );
+
+                if (stressScore > 0.7) {
+                    plumbingConclusion = "Systemic plumbing is showing critical stress. Elevated credit spreads and high bond volatility suggest institutional liquidity is tightening, creating a high-risk environment for leveraged positions.";
+                    plumbingStatus = "CRITICAL";
+                    plumbingColor = "text-terminal-bearish";
+                } else if (stressScore > 0.4) {
+                    plumbingConclusion = "Caution: Systemic tension is rising. Credit markets are pricing in increased risk, and volatility in the rates market is exerting pressure on overall financial stability.";
+                    plumbingStatus = "CAUTION";
+                    plumbingColor = "text-yellow-500";
+                } else if (fred.yield_10y3m < -0.1) {
+                    plumbingConclusion = "Monetary structure remains restrictive. The yield curve inversion highlights persistent recessionary signals despite relatively calm credit markets.";
+                    plumbingStatus = "RESTRICTIVE";
+                } else if (stressScore < 0.25 && fred.nfci < -0.5) {
+                    plumbingConclusion = "Systemic plumbing is highly accommodative. Low stress markers and loose financial conditions provide a supportive backdrop for risk-asset expansion.";
+                    plumbingStatus = "ACCOMMODATIVE";
+                    plumbingColor = "text-terminal-bullish";
+                } else {
+                    plumbingConclusion = "Systemic pulse is currently neutral. Financial conditions are in equilibrium, without immediate signs of liquidity distress or extreme accommodation.";
+                }
+
+                document.getElementById('plumbing-summary').innerHTML = `
+                    <div class="p-4 rounded-xl border border-white/5 bg-terminal-accent/5 backdrop-blur-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-3 opacity-10">
+                            <svg class="w-12 h-12 text-terminal-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </div>
+                        <div class="flex items-center space-x-3 mb-2">
+                            <span class="text-[10px] font-mono text-terminal-muted uppercase tracking-[0.2em]">Institutional Systemic Pulse</span>
+                            <span class="h-px flex-1 bg-white/5"></span>
+                            <span class="text-[10px] font-mono font-bold ${plumbingColor} uppercase">${plumbingStatus}</span>
+                        </div>
+                        <p class="text-xs font-sans text-white/90 leading-relaxed italic pr-12">
+                            "${plumbingConclusion}"
+                        </p>
+                    </div>
+                `;
 
                 // --- GROWTH & MOMENTUM PULSE ---
                 const rawMkt = DATA.raw.market;
