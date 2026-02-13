@@ -4,33 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Macro Compass | Zero-Touch Intelligence</title>
+    <title>Global Macro Terminal | Revoro Alpha</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
         rel="stylesheet">
     <script>
         tailwind.config = {
-            theme: { extend: { fontFamily: { mono: ['"JetBrains Mono"'], sans: ['Outfit'] }, colors: { dark: '#0a0e14', accent: '#00f2ff', bullish: '#00ff88', bearish: '#ff3366' } } }
+            theme: {
+                extend: {
+                    fontFamily: { mono: ['"JetBrains Mono"'], sans: ['Inter'] },
+                    colors: {
+                        terminal: {
+                            bg: '#020408',
+                            card: '#0c0f16',
+                            border: '#1e2633',
+                            accent: '#00f2ff',
+                            bullish: '#00ffa3',
+                            bearish: '#ff2d55',
+                            muted: '#6b7280'
+                        }
+                    }
+                }
+            }
         }
     </script>
     <style>
         body {
-            background-color: #0a0e14;
-            color: #e0e0e0;
+            background-color: #020408;
+            color: #f3f4f6;
         }
 
         .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(12, 15, 22, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.02), transparent);
             background-size: 200% 100%;
-            animation: shimmer 3s infinite;
+            animation: shimmer 8s infinite linear;
         }
 
         @keyframes shimmer {
@@ -42,142 +57,255 @@
                 background-position: 200% 0;
             }
         }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
     </style>
 </head>
 
-<body class="font-sans min-h-screen pb-24">
-    <header class="p-8 border-b border-white/10 flex justify-between items-center">
-        <div>
-            <h1 class="font-mono text-3xl font-bold tracking-tighter text-accent">🧭 GLOBAL MACRO COMPASS</h1>
-            <p class="text-sm text-white/50 font-mono mt-1">V2026.1 // ALPHA STRATEGY ENGINE</p>
+<body class="font-sans min-h-screen overflow-x-hidden selection:bg-terminal-accent selection:text-terminal-bg">
+    <div class="fixed inset-0 shimmer pointer-events-none z-0"></div>
+
+    <!-- Main Command Center -->
+    <main class="relative z-10 max-w-[1600px] mx-auto p-4 lg:p-8 space-y-6">
+
+        <!-- Institutional Header -->
+        <header
+            class="flex flex-col md:flex-row justify-between items-start md:items-center glass p-6 rounded-2xl border-white/5 space-y-4 md:space-y-0">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-terminal-accent rounded flex items-center justify-center">
+                        <span class="text-terminal-bg font-bold text-lg">R</span>
+                    </div>
+                    <h1 class="text-2xl font-mono font-bold tracking-tighter text-white">GLOBAL MACRO TERMINAL <span
+                            class="text-terminal-accent">v3.5</span></h1>
+                </div>
+                <p class="text-[10px] text-terminal-muted font-mono mt-1 tracking-[0.2em] uppercase">Quantitative Alpha
+                    Selection // Systemic Risk Monitoring</p>
+            </div>
+            <div class="flex items-center space-x-8">
+                <div class="text-right">
+                    <p class="text-[10px] font-mono text-terminal-muted uppercase leading-none mb-1">Net Liquidity</p>
+                    <p class="text-lg font-mono text-terminal-accent font-bold" id="nav-liq">--</p>
+                </div>
+                <div class="h-10 w-px bg-white/10 hidden md:block"></div>
+                <div class="text-right">
+                    <p class="text-[10px] font-mono text-terminal-muted uppercase leading-none mb-1">System Pulse</p>
+                    <div class="flex items-center justify-end space-x-2">
+                        <div class="w-1.5 h-1.5 bg-terminal-bullish rounded-full animate-pulse"></div>
+                        <p class="text-sm font-mono text-white" id="nav-date">--</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Top Insights Tier -->
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <!-- Regime Score (Composite) -->
+            <div
+                class="xl:col-span-1 glass rounded-2xl p-6 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div class="absolute top-4 left-6 flex flex-col">
+                    <span class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest">Market
+                        Regime</span>
+                    <span class="text-xs font-mono text-terminal-accent">COMPOSITE ALPHA</span>
+                </div>
+                <div id="gauge" class="w-full mt-4"></div>
+                <div class="text-center">
+                    <p id="regime-label"
+                        class="text-3xl font-mono font-bold tracking-widest text-white uppercase italic">ANALYZING</p>
+                    <p class="text-[10px] font-mono text-terminal-muted mt-2 uppercase tracking-tighter">Weighted
+                        Institutional Proxy</p>
+                </div>
+            </div>
+
+            <!-- Risk Radar (6 pillars) -->
+            <div class="xl:col-span-1 glass rounded-2xl p-6">
+                <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-4">Strategic Radar</p>
+                <div id="radar" class="h-64"></div>
+            </div>
+
+            <!-- Monetary & Systemic Conditions -->
+            <div class="xl:col-span-2 glass rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest">Decision Matrix:
+                        Monetary & Credit Conditions</p>
+                    <span
+                        class="text-[10px] font-mono px-2 py-0.5 border border-terminal-accent/30 text-terminal-accent rounded">LIVE
+                        FRED DATA</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="risk-matrix">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
         </div>
-        <div class="text-right">
-            <p class="text-xs font-mono text-white/40 uppercase">LAST PULSE</p>
-            <p class="text-lg font-mono" id="date">--</p>
+
+        <!-- Middle Market Tier -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <!-- Growth & Ratios -->
+            <div class="xl:col-span-1 glass rounded-2xl p-6">
+                <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-6">Industrial Growth
+                    Check (Au/Cu)</p>
+                <div class="flex items-end justify-between mb-8">
+                    <div>
+                        <p class="text-3xl font-mono font-bold text-white" id="cg-ratio-val">--</p>
+                        <p class="text-[10px] font-mono text-terminal-accent uppercase">Copper/Gold Ratio</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-mono text-terminal-muted">21D Momentum</p>
+                        <p class="text-xl font-mono" id="cg-mom-val">--</p>
+                    </div>
+                </div>
+                <div id="growth-chart" class="h-40"></div>
+            </div>
+
+            <!-- Correlation Intelligence -->
+            <div class="xl:col-span-2 glass rounded-2xl p-6 overflow-hidden">
+                <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-6">Cross-Asset
+                    Alignment (1M Correlation)</p>
+                <div class="overflow-x-auto no-scrollbar">
+                    <table class="w-full text-[11px] font-mono border-collapse" id="corr-matrix">
+                        <!-- Dynamic -->
+                    </table>
+                </div>
+            </div>
         </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <section class="glass rounded-2xl p-8 relative overflow-hidden">
-            <div class="absolute inset-0 shimmer opacity-20"></div>
-            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Market Regime Score</h2>
-            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">A weighted composite of growth, inflation,
-                and momentum. Tells you if the aggregate market is in an expansionary (Risk-On) or contractionary
-                (Risk-Off) state.</p>
-            <div id="gauge" class="h-64"></div>
-            <div class="text-center mt-4">
-                <span id="label"
-                    class="text-4xl font-bold font-mono tracking-widest px-4 py-2 rounded-lg border-2">CALCULATING...</span>
+        <!-- Momentum & Velocity -->
+        <div class="glass rounded-2xl p-6">
+            <div class="flex justify-between items-center mb-6">
+                <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest">Market Velocity &
+                    Rotation (21D Momentum)</p>
+                <div class="flex space-x-4">
+                    <div class="flex items-center space-x-1">
+                        <div class="w-2 h-2 bg-terminal-bullish rounded-full"></div>
+                        <span class="text-[10px] font-mono text-terminal-muted">BULLISH</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <div class="w-2 h-2 bg-terminal-bearish rounded-full"></div>
+                        <span class="text-[10px] font-mono text-terminal-muted">BEARISH</span>
+                    </div>
+                </div>
             </div>
-        </section>
+            <div id="momentum-chart" class="h-72"></div>
+        </div>
 
-        <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Global Sentiment Pulse</h2>
-            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">Real-time news sentiment from the top 50
-                global financial headlines. Bullish volume indicates speculative appetite, while Bearish volume suggests
-                fear-driven hedging.</p>
-            <div id="sentiment" class="h-64"></div>
-        </section>
-
-        <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Asset Correlation (1M)</h2>
-            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">Measures how assets move together. High
-                correlation across disjointed asset classes (e.g., Gold & Stocks) often signals systemic stress or
-                liquidity events.</p>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm font-mono border-collapse" id="corr">
-                    <!-- Dynamic Table -->
-                </table>
+        <!-- Footer -->
+        <footer
+            class="flex flex-col md:row justify-between items-center glass p-6 rounded-2xl border-white/5 space-y-4 md:space-y-0">
+            <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-[0.2em] italic">Proprietary Alpha
+                Discovery // Not Financial Advice</p>
+            <div class="flex items-center space-x-6">
+                <p class="text-[10px] font-mono text-terminal-muted">LICENSE: INSTITUTIONAL-FREE-TIER</p>
+                <a href="https://calendly.com/chrisberlin/session" target="_blank"
+                    class="px-6 py-2 bg-terminal-accent/10 border border-terminal-accent/30 text-terminal-accent font-mono text-[10px] uppercase tracking-widest rounded-lg hover:bg-terminal-accent/20 transition-all">Strategic
+                    Session →</a>
             </div>
-        </section>
-
-        <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Macro Pulse Checklist</h2>
-            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">The fundamental building blocks of the
-                Regime Score. Tracks the Yield Curve (recession risk), CPI (purchasing power), and S&P 500 momentum.</p>
-            <div class="space-y-6" id="pulse"></div>
-            <div class="mt-8 pt-6 border-t border-white/10">
-                <p class="text-xs font-mono text-white/40 uppercase">Fed Funds Rate</p>
-                <p class="text-5xl font-bold text-accent font-mono mt-1" id="funds">--%</p>
-            </div>
-        </section>
+        </footer>
     </main>
 
-    <footer class="fixed bottom-0 left-0 w-full glass border-t border-accent/30 py-4 text-center z-50">
-        <p class="font-mono text-sm">
-            WANT PROPRIETARY ALPHA? <a href="https://calendly.com/chrisberlin/session" target="_blank"
-                class="text-accent font-bold ml-2 underline">BOOK A STRATEGIC SESSION →</a>
-        </p>
-    </footer>
-
     <script id="macro-data">
-        // --- DATA INJECTION POINT ---
-        const DATA = { "composite": 0.3614379847849986, "components": { "Growth": 1.0, "Inflation": -0.19560071607500706, "Momentum": 0.0, "Sentiment": 0.5027906400000001 }, "raw": { "fred": { "yield_curve": 0.62, "inflation": 2.391201432150014, "fed_funds": 3.64 }, "market": { "momentum": { "GLD": 0.0, "SPY": 0.0, "USO": 0.0, "^GDAXI": 0.001977668884395989, "^N225": -0.012107443317708522 }, "correlation": { "GLD": { "GLD": 1.0, "SPY": 0.22181523043537005, "USO": 0.6310669477907993, "^GDAXI": -0.4998970087782845, "^N225": 0.17643300695700787 }, "SPY": { "GLD": 0.22181523043537005, "SPY": 1.0, "USO": 0.09971587659137389, "^GDAXI": 0.31581161252743384, "^N225": -0.1694029816451352 }, "USO": { "GLD": 0.6310669477907993, "SPY": 0.09971587659137389, "USO": 1.0, "^GDAXI": -0.5569858240804347, "^N225": 0.4287765279995421 }, "^GDAXI": { "GLD": -0.4998970087782845, "SPY": 0.31581161252743384, "USO": -0.5569858240804347, "^GDAXI": 1.0, "^N225": 0.16731095397818171 }, "^N225": { "GLD": 0.17643300695700787, "SPY": -0.1694029816451352, "USO": 0.4287765279995421, "^GDAXI": 0.16731095397818171, "^N225": 1.0 } } } } };
-        // --- END DATA INJECTION ---
+        const DATA = { "composite": 0.2297, "components": { "Liquidity": 0.5, "Credit": 0.8, "Monetary Conditions": 0.7, "Growth (Cu/Au)": 0.3, "Risk Appetite": -0.1, "Sentiment": 0.5 }, "raw": { "fred": { "yield_10y3m": 0.39, "real_yield": 1.89, "hy_spread": 3.2, "nfci": -0.5, "inflation": 3.1, "fed_funds": 5.33, "net_liquidity": 6.5e12 }, "market": { "momentum": { "SPY": 0.02, "GLD": 0.01, "HG=F": 0.01, "DX-Y.NYB": 0.01, "XLK": 0.03, "XLP": 0.01 }, "cg_ratio": 0.002, "rotation": -0.1122, "correlation": {} } } };
 
-        document.getElementById('date').innerText = new Date().toISOString().split('T')[0];
+        document.getElementById('nav-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        document.getElementById('nav-liq').innerText = `$${(DATA.raw.fred.net_liquidity / 1e12).toFixed(2)}T`;
 
         const score = DATA.composite;
-        const color = score > 0.3 ? '#00ff88' : (score < -0.3 ? '#ff3366' : '#ffffff');
-        const text = score > 0.3 ? 'RISK-ON' : (score < -0.3 ? 'RISK-OFF' : 'NEUTRAL');
+        const color = score > 0.2 ? '#00ffa3' : (score < -0.2 ? '#ff2d55' : '#6b7280');
+        const text = score > 0.3 ? 'HEAVY BULLISH' : (score > 0.1 ? 'SOFT BULLISH' : (score < -0.3 ? 'HEAVY BEARISH' : (score < -0.1 ? 'SOFT BEARISH' : 'TRANSITION')));
 
-        document.getElementById('label').innerText = text;
-        document.getElementById('label').style.color = color;
-        document.getElementById('label').style.borderColor = color;
+        document.getElementById('regime-label').innerText = text;
+        document.getElementById('regime-label').style.color = color;
 
+        // --- GAUGE ---
         new ApexCharts(document.querySelector("#gauge"), {
             series: [((score + 1) / 2) * 100],
-            chart: { height: 350, type: 'radialBar' },
+            chart: { height: 280, type: 'radialBar', sparkline: { enabled: true } },
             plotOptions: {
                 radialBar: {
-                    startAngle: -90,
-                    endAngle: 90,
-                    track: { background: "#333" },
-                    dataLabels: { value: { offsetY: -2, color: '#fff', formatter: () => score.toFixed(2) } }
+                    startAngle: -110, endAngle: 110,
+                    hollow: { size: '65%' },
+                    track: { background: "#161b24", strokeWidth: '100%' },
+                    dataLabels: {
+                        name: { show: false },
+                        value: { offsetY: 5, fontSize: '32px', fontWeight: 'bold', color: '#fff', fontFamily: 'JetBrains Mono', formatter: () => score.toFixed(2) }
+                    }
                 }
             },
-            fill: { colors: [color] },
-            labels: ['Score'],
+            fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', gradientToColors: [color], stops: [0, 100] } },
+            stroke: { lineCap: 'butt' },
         }).render();
 
-        new ApexCharts(document.querySelector("#sentiment"), {
-            series: [{ data: [Math.max(0, -DATA.components.Sentiment), 1 - Math.abs(DATA.components.Sentiment), Math.max(0, DATA.components.Sentiment)] }],
-            chart: { type: 'bar', height: 250, toolbar: { show: false } },
-            colors: ['#ff3366', '#888888', '#00ff88'],
-            plotOptions: { bar: { distributed: true, borderRadius: 4 } },
-            xaxis: { categories: ['Bearish', 'Neutral', 'Bullish'], labels: { style: { colors: '#fff' } } },
-            grid: { show: false },
-            legend: { show: false }
+        // --- RADAR ---
+        new ApexCharts(document.querySelector("#radar"), {
+            series: [{ name: 'Factor Impact', data: Object.values(DATA.components).map(v => Math.max(0, (v + 1) / 2 * 100)) }],
+            chart: { height: 280, type: 'radar', toolbar: { show: false } },
+            xaxis: { categories: Object.keys(DATA.components), labels: { style: { colors: '#6b7280', fontSize: '9px', fontFamily: 'JetBrains Mono' } } },
+            yaxis: { show: false, min: 0, max: 100 },
+            colors: ['#00f2ff'],
+            fill: { opacity: 0.2 },
+            markers: { size: 3, colors: ['#00f2ff'], strokeWidth: 0 },
+            grid: { padding: { bottom: 0, top: 0 } }
         }).render();
 
-        const corrTable = document.getElementById('corr');
-        const assets = Object.keys(DATA.raw.market.correlation);
-        if (assets.length > 0) {
-            let html = '<thead><tr class="text-white/40"><th></th>' + assets.map(a => `<th class="p-2">${a}</th>`).join('') + '</tr></thead><tbody>';
+        // --- RISK MATRIX ---
+        const fred = DATA.raw.fred;
+        const matrixItems = [
+            { l: 'HY Credit Spread', v: fred.hy_spread.toFixed(2) + '%', d: 'BAML OAS vs Treasuries', s: fred.hy_spread < 4.5 ? 1 : -1 },
+            { l: 'Monetary Index (NFCI)', v: fred.nfci.toFixed(2), d: 'Chicago Fed Conditions', s: fred.nfci < 0 ? 1 : -1 },
+            { l: '10Y - 3M Yield Spread', v: fred.yield_10y3m.toFixed(2) + '%', d: 'Recession Signal', s: fred.yield_10y3m > 0 ? 1 : -1 },
+            { l: 'Real Yield (US 10Y)', v: fred.real_yield.toFixed(2) + '%', d: 'Inflation-Adjusted Return', s: fred.real_yield < 2.5 ? 0 : -1 }
+        ];
+
+        document.getElementById('risk-matrix').innerHTML = matrixItems.map(item => `
+            <div class="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center justify-between group">
+                <div>
+                    <p class="text-[10px] font-mono text-terminal-muted uppercase">${item.l}</p>
+                    <p class="text-[9px] font-mono text-terminal-muted italic">${item.d}</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xl font-mono font-bold ${item.s > 0 ? 'text-terminal-bullish' : (item.s < 0 ? 'text-terminal-bearish' : 'text-white')}">${item.v}</p>
+                </div>
+            </div>
+        `).join('');
+
+        // --- GROWTH (CU/AU) ---
+        document.getElementById('cg-ratio-val').innerText = DATA.raw.market.cg_ratio.toFixed(4);
+        const cgMom = (DATA.components['Growth (Cu/Au)'] * 100);
+        document.getElementById('cg-mom-val').innerText = (cgMom > 0 ? '+' : '') + cgMom.toFixed(2) + '%';
+        document.getElementById('cg-mom-val').className = `text-xl font-mono ${cgMom > 0 ? 'text-terminal-bullish' : 'text-terminal-bearish'}`;
+
+        // --- MOMENTUM CHART ---
+        const momData = DATA.raw.market.momentum;
+        new ApexCharts(document.querySelector("#momentum-chart"), {
+            series: [{ name: '21D Return', data: Object.values(momData).map(v => (v * 100).toFixed(2)) }],
+            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+            plotOptions: { bar: { borderRadius: 6, distributed: true, dataLabels: { position: 'top' } } },
+            colors: Object.values(momData).map(v => v >= 0 ? '#00ffa3' : '#ff2d55'),
+            xaxis: { categories: Object.keys(momData), labels: { style: { colors: '#6b7280', fontFamily: 'JetBrains Mono', fontSize: '10px' } } },
+            yaxis: { labels: { formatter: (v) => v + '%', style: { colors: '#6b7280', fontSize: '10px' } } },
+            dataLabels: { enabled: true, formatter: (v) => v + '%', style: { fontSize: '10px', colors: ['#fff'] }, offsetY: -20 },
+            grid: { borderColor: '#1e2633', strokeDashArray: 4 }
+        }).render();
+
+        // --- CORRELATION MATRIX ---
+        const assets = Object.keys(DATA.raw.market.momentum); // Asset list
+        const corel = DATA.raw.market.correlation;
+        const matrixEl = document.getElementById('corr-matrix');
+        if (assets.length > 0 && corel['SPY']) {
+            let html = '<thead><tr class="text-terminal-muted border-b border-white/5"><th class="p-3 text-left">ASSET</th>' + assets.map(a => `<th class="p-3 text-center">${a}</th>`).join('') + '</tr></thead><tbody>';
             assets.forEach(r => {
-                html += `<tr><td class="p-2 font-bold">${r}</td>`;
+                html += `<tr class="border-b border-white/5"><td class="p-3 font-bold text-white uppercase">${r}</td>`;
                 assets.forEach(c => {
-                    const v = DATA.raw.market.correlation[r][c];
-                    const cl = v > 0.5 ? 'bg-bullish/20' : (v < -0.5 ? 'bg-bearish/20' : 'bg-white/5');
-                    html += `<td class="p-2 ${cl} border border-white/5">${v.toFixed(2)}</td>`;
+                    const v = (corel[r] && corel[r][c] !== undefined) ? corel[r][c] : 0;
+                    const intensity = Math.abs(v);
+                    const color = v > 0.5 ? `rgba(0, 255, 163, ${intensity * 0.2})` : (v < -0.5 ? `rgba(255, 45, 85, ${intensity * 0.2})` : 'transparent');
+                    html += `<td class="p-3 text-center border-l border-white/5" style="background: ${color}">${v.toFixed(2)}</td>`;
                 });
                 html += '</tr>';
             });
-            corrTable.innerHTML = html + '</tbody>';
+            matrixEl.innerHTML = html + '</tbody>';
         }
-
-        const pulseItems = [
-            { l: 'Growth (Yield Curve)', v: DATA.raw.fred.yield_curve.toFixed(2), s: DATA.components.Growth },
-            { l: 'Inflation (CPI YoY)', v: DATA.raw.fred.inflation.toFixed(1) + '%', s: DATA.components.Inflation },
-            { l: 'Momentum (S&P 500)', v: (DATA.raw.market.momentum.SPY * 100).toFixed(1) + '%', s: DATA.components.Momentum }
-        ];
-        document.getElementById('pulse').innerHTML = pulseItems.map(i => `
-            <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
-                <span class="text-white/70">${i.s > 0.2 ? '🟢' : (i.s < -0.2 ? '🔴' : '🟡')} ${i.l}</span>
-                <span class="font-bold text-lg font-mono">${i.v}</span>
-            </div>
-        `).join('');
-        document.getElementById('funds').innerText = DATA.raw.fred.fed_funds.toFixed(2) + '%';
     </script>
 </body>
 
