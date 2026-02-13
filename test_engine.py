@@ -16,9 +16,9 @@ def test_engine():
         print("\n--- RAW DATA PREVIEW ---")
         fred = data['raw']['fred']
         print(f"Net Liquidity: ${fred['net_liquidity']:,.0f}")
-        print(f"Yield 10Y-3M: {fred['yield_10y3m']:.2f}")
-        print(f"Real Yield: {fred['real_yield']:.2f}")
-        print(f"Rotation: {data['raw']['market']['rotation']:.4f}")
+        print(f"System Stress: {fred['stress_index']:.2f}")
+        print(f"Rotation (Equity): {data['raw']['market']['rotation_raw']:.4f}")
+        print(f"Bond Vol (MOVE): {data['raw']['market']['tlt_vol']:.1f}%")
         
         print("\nVerification Successful.")
     except Exception as e:

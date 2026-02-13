@@ -2,6 +2,9 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import requests
+import json
+import re
+from datetime import datetime, timedelta
 from fredapi import Fred
 import os
 from dotenv import load_dotenv
@@ -40,15 +43,16 @@ class MacroEngine:
                 # Credit Stress (HY Spread) & Financial Conditions (NFCI)
                 hy_spread = self.fred.get_series('BAMLH0A0HYM2').iloc[-1]
                 nfci = self.fred.get_series('NFCI').iloc[-1]
+                stress_index = self.fred.get_series('STLFSI4').iloc[-1] # St. Louis Fed Stress Index
                 
                 cpi = self.fred.get_series('CPIAUCSL')
                 inflation = cpi.pct_change(12).iloc[-1] * 100
                 fed_funds = self.fred.get_series('FEDFUNDS').iloc[-1]
                 liquidity = self.get_net_liquidity()
             else:
-                yield_10y3m, real_yield, hy_spread, nfci, inflation, fed_funds, liquidity = -0.6, 2.1, 4.5, -0.5, 3.1, 5.33, 6.5e12
+                yield_10y3m, real_yield, hy_spread, nfci, stress_index, inflation, fed_funds, liquidity = -0.6, 2.1, 4.5, -0.5, 0.2, 3.1, 5.33, 6.5e12
         except Exception:
-            yield_10y3m, real_yield, hy_spread, nfci, inflation, fed_funds, liquidity = -0.6, 2.1, 4.5, -0.5, 3.1, 5.33, 6.5e12
+            yield_10y3m, real_yield, hy_spread, nfci, stress_index, inflation, fed_funds, liquidity = -0.6, 2.1, 4.5, -0.5, 0.2, 3.1, 5.33, 6.5e12
 
         # 2. Market Dynamics (YFinance)
         assets = {
@@ -56,6 +60,7 @@ class MacroEngine:
             'GLD': 'Gold', 
             'HG=F': 'Copper',
             'DX-Y.NYB': 'Dollar Index',
+            'TLT': 'Long Bonds',
             'XLK': 'Technology', 
             'XLP': 'Staples'
         }
@@ -65,15 +70,20 @@ class MacroEngine:
             momentum = df.pct_change(21).iloc[-1].to_dict() # 21-day momentum
             
             # Growth Proxy: Copper / Gold ratio (Industrial vs Safe Haven)
-            cg_ratio = (df['HG=F'] / df['GLD']).iloc[-1]
-            cg_momentum = (df['HG=F'] / df['GLD']).pct_change(21).iloc[-1]
+            ratio_series = (df['HG=F'] / df['GLD']).ffill().bfill()
+            cg_ratio = ratio_series.iloc[-1]
+            cg_momentum = ratio_series.pct_change(21).iloc[-1]
+            
+            # Risk Proxy: TLT Volatility (MOVE proxy)
+            tlt_vol = df['TLT'].pct_change().std() * np.sqrt(252) * 100
             
             # Sector Rotation: Tech vs Staples
-            rotation = (df['XLK'] / df['XLP']).pct_change(21).iloc[-1]
+            rotation_series = (df['XLK'] / df['XLP']).ffill().bfill()
+            rotation_raw = rotation_series.pct_change(21).iloc[-1]
             correlation = df.corr().to_dict()
         except Exception:
             momentum = {k: 0.01 for k in assets}
-            cg_ratio, cg_momentum, rotation = 0.002, 0.01, 0.02
+            cg_ratio, cg_momentum, rotation_raw, tlt_vol = 0.0125, -0.11, -0.10, 15.0
             correlation = {k: {k2: 1.0 if k==k2 else 0.5 for k2 in assets} for k in assets}
 
         # 3. Sentiment (Alpha Vantage)
@@ -91,7 +101,7 @@ class MacroEngine:
         s_credit = np.clip((4.5 - hy_spread) / 2.5, -1, 1) # Credit Spreads
         s_conditions = np.clip(-nfci / 0.8, -1, 1) # Financial Conditions
         s_growth = np.clip(cg_momentum / 0.15, -1, 1) # Copper/Gold Momentum (Loosened to 15%)
-        s_rotation = np.clip(rotation / 0.15, -1, 1) # Risk appetite (Loosened to 15%)
+        s_rotation = np.clip(rotation_raw / 0.15, -1, 1) # Risk appetite (Loosened to 15%)
         s_sentiment = np.clip(sentiment / 0.5, -1, 1)
 
         # Institutional Weighting
@@ -114,6 +124,7 @@ class MacroEngine:
                     'real_yield': float(real_yield),
                     'hy_spread': float(hy_spread),
                     'nfci': float(nfci),
+                    'stress_index': float(stress_index),
                     'inflation': float(inflation),
                     'fed_funds': float(fed_funds),
                     'net_liquidity': float(liquidity)
@@ -121,7 +132,9 @@ class MacroEngine:
                 'market': {
                     'momentum': momentum,
                     'cg_ratio': float(cg_ratio),
-                    'rotation': float(rotation),
+                    'cg_momentum': float(cg_momentum) if not np.isnan(cg_momentum) else 0.0,
+                    'rotation_raw': float(rotation_raw),
+                    'tlt_vol': float(tlt_vol),
                     'correlation': correlation
                 }
             }
