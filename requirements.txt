@@ -1,11 +1,7 @@
-streamlit
 yfinance
 pandas
-pandas_datareader
-plotly
-python-dotenv
-requests
-scikit-learn
-statsmodels
+numpy
 fredapi
 flask
+requests
+python-dotenv
