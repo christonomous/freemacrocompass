@@ -87,12 +87,12 @@ class MacroEngine:
             except Exception: pass
 
         # 4. Professional Normalization
-        s_liquidity = np.clip((liquidity - 6e12) / 1.5e12, -1, 1) # Net Liquidity
-        s_credit = np.clip((4.0 - hy_spread) / 2.0, -1, 1) # Credit Spreads (Lower is better)
-        s_conditions = np.clip(-nfci / 0.5, -1, 1) # Financial Conditions (Negative is loose/bullish)
-        s_growth = np.clip(cg_momentum / 0.05, -1, 1) # Copper/Gold Momentum
-        s_rotation = np.clip(rotation / 0.05, -1, 1) # Risk appetite
-        s_sentiment = np.clip(sentiment / 0.4, -1, 1)
+        s_liquidity = np.clip((liquidity - 6e12) / 2e12, -1, 1) # Net Liquidity (Divisor to 2T)
+        s_credit = np.clip((4.5 - hy_spread) / 2.5, -1, 1) # Credit Spreads
+        s_conditions = np.clip(-nfci / 0.8, -1, 1) # Financial Conditions
+        s_growth = np.clip(cg_momentum / 0.15, -1, 1) # Copper/Gold Momentum (Loosened to 15%)
+        s_rotation = np.clip(rotation / 0.15, -1, 1) # Risk appetite (Loosened to 15%)
+        s_sentiment = np.clip(sentiment / 0.5, -1, 1)
 
         # Institutional Weighting
         composite = (s_liquidity * 0.25) + (s_credit * 0.20) + (s_conditions * 0.15) + \
@@ -103,9 +103,9 @@ class MacroEngine:
             'components': {
                 'Liquidity': float(s_liquidity),
                 'Credit': float(s_credit),
-                'Monetary Conditions': float(s_conditions),
-                'Growth (Cu/Au)': float(s_growth),
-                'Risk Appetite': float(s_rotation),
+                'Monetary': float(s_conditions),
+                'Growth': float(s_growth),
+                'Appetite': float(s_rotation),
                 'Sentiment': float(s_sentiment)
             },
             'raw': {

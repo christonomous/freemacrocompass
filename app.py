@@ -19,7 +19,7 @@ def home():
         content = f.read()
 
     # Injection logic - Replace the placeholder DATA object
-    placeholder = 'const DATA = { "composite": 0.2297, "components": { "Liquidity": 0.5, "Credit": 0.8, "Monetary Conditions": 0.7, "Growth (Cu/Au)": 0.3, "Risk Appetite": -0.1, "Sentiment": 0.5 }, "raw": { "fred": { "yield_10y3m": 0.39, "real_yield": 1.89, "hy_spread": 3.2, "nfci": -0.5, "inflation": 3.1, "fed_funds": 5.33, "net_liquidity": 6.5e12 }, "market": { "momentum": { "SPY": 0.02, "GLD": 0.01, "HG=F": 0.01, "DX-Y.NYB": 0.01, "XLK": 0.03, "XLP": 0.01 }, "cg_ratio": 0.002, "rotation": -0.1122, "correlation": {} } } };'
+    placeholder = 'const DATA = { "composite": 0.2297, "components": { "Liquidity": 0.5, "Credit": 0.8, "Monetary": 0.7, "Growth": 0.3, "Appetite": -0.1, "Sentiment": 0.5 }, "raw": { "fred": { "yield_10y3m": 0.39, "real_yield": 1.89, "hy_spread": 3.2, "nfci": -0.5, "inflation": 3.1, "fed_funds": 5.33, "net_liquidity": 6.5e12 }, "market": { "momentum": { "SPY": 0.02, "GLD": 0.01, "HG=F": 0.01, "DX-Y.NYB": 0.01, "XLK": 0.03, "XLP": 0.01 }, "cg_ratio": 0.002, "rotation": -0.1122, "correlation": {} } } };'
     
     if placeholder in content:
         data_string = f'const DATA = {json.dumps(data)};'

@@ -205,7 +205,7 @@
     </main>
 
     <script id="macro-data">
-        const DATA = { "composite": 0.2297, "components": { "Liquidity": 0.5, "Credit": 0.8, "Monetary Conditions": 0.7, "Growth (Cu/Au)": 0.3, "Risk Appetite": -0.1, "Sentiment": 0.5 }, "raw": { "fred": { "yield_10y3m": 0.39, "real_yield": 1.89, "hy_spread": 3.2, "nfci": -0.5, "inflation": 3.1, "fed_funds": 5.33, "net_liquidity": 6.5e12 }, "market": { "momentum": { "SPY": 0.02, "GLD": 0.01, "HG=F": 0.01, "DX-Y.NYB": 0.01, "XLK": 0.03, "XLP": 0.01 }, "cg_ratio": 0.002, "rotation": -0.1122, "correlation": {} } } };
+        const DATA = { "composite": 0.2297, "components": { "Liquidity": 0.5, "Credit": 0.8, "Monetary": 0.7, "Growth": 0.3, "Appetite": -0.1, "Sentiment": 0.5 }, "raw": { "fred": { "yield_10y3m": 0.39, "real_yield": 1.89, "hy_spread": 3.2, "nfci": -0.5, "inflation": 3.1, "fed_funds": 5.33, "net_liquidity": 6.5e12 }, "market": { "momentum": { "SPY": 0.02, "GLD": 0.01, "HG=F": 0.01, "DX-Y.NYB": 0.01, "XLK": 0.03, "XLP": 0.01 }, "cg_ratio": 0.002, "rotation": -0.1122, "correlation": {} } } };
 
         document.getElementById('nav-date').innerText = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         document.getElementById('nav-liq').innerText = `$${(DATA.raw.fred.net_liquidity / 1e12).toFixed(2)}T`;
@@ -228,24 +228,32 @@
                     track: { background: "#161b24", strokeWidth: '100%' },
                     dataLabels: {
                         name: { show: false },
-                        value: { offsetY: 5, fontSize: '32px', fontWeight: 'bold', color: '#fff', fontFamily: 'JetBrains Mono', formatter: () => score.toFixed(2) }
+                        value: { offsetY: 5, fontSize: '32px', fontWeight: 'bold', color: '#fff', fontFamily: 'Inter', formatter: () => score.toFixed(2) }
                     }
                 }
             },
             fill: { type: 'gradient', gradient: { shade: 'dark', type: 'horizontal', gradientToColors: [color], stops: [0, 100] } },
             stroke: { lineCap: 'butt' },
+            tooltip: { enabled: true, theme: 'dark' }
         }).render();
 
         // --- RADAR ---
         new ApexCharts(document.querySelector("#radar"), {
             series: [{ name: 'Factor Impact', data: Object.values(DATA.components).map(v => Math.max(0, (v + 1) / 2 * 100)) }],
             chart: { height: 280, type: 'radar', toolbar: { show: false } },
-            xaxis: { categories: Object.keys(DATA.components), labels: { style: { colors: '#6b7280', fontSize: '9px', fontFamily: 'JetBrains Mono' } } },
+            plotOptions: {
+                radar: {
+                    size: 85,
+                    polygons: { strokeColors: '#1e2633', fill: { colors: ['transparent'] } }
+                }
+            },
+            xaxis: { categories: Object.keys(DATA.components), labels: { style: { colors: '#6b7280', fontSize: '10px', fontFamily: 'JetBrains Mono' } } },
             yaxis: { show: false, min: 0, max: 100 },
             colors: ['#00f2ff'],
             fill: { opacity: 0.2 },
             markers: { size: 3, colors: ['#00f2ff'], strokeWidth: 0 },
-            grid: { padding: { bottom: 0, top: 0 } }
+            grid: { padding: { left: 10, right: 10 } },
+            tooltip: { theme: 'dark' }
         }).render();
 
         // --- RISK MATRIX ---
@@ -279,13 +287,39 @@
         const momData = DATA.raw.market.momentum;
         new ApexCharts(document.querySelector("#momentum-chart"), {
             series: [{ name: '21D Return', data: Object.values(momData).map(v => (v * 100).toFixed(2)) }],
-            chart: { type: 'bar', height: 280, toolbar: { show: false } },
-            plotOptions: { bar: { borderRadius: 6, distributed: true, dataLabels: { position: 'top' } } },
+            chart: { type: 'bar', height: 280, toolbar: { show: false }, background: 'transparent' },
+            plotOptions: {
+                bar: {
+                    borderRadius: 6,
+                    distributed: true,
+                    dataLabels: { position: 'top' }
+                }
+            },
             colors: Object.values(momData).map(v => v >= 0 ? '#00ffa3' : '#ff2d55'),
             xaxis: { categories: Object.keys(momData), labels: { style: { colors: '#6b7280', fontFamily: 'JetBrains Mono', fontSize: '10px' } } },
             yaxis: { labels: { formatter: (v) => v + '%', style: { colors: '#6b7280', fontSize: '10px' } } },
-            dataLabels: { enabled: true, formatter: (v) => v + '%', style: { fontSize: '10px', colors: ['#fff'] }, offsetY: -20 },
-            grid: { borderColor: '#1e2633', strokeDashArray: 4 }
+            dataLabels: {
+                enabled: true,
+                formatter: (v) => v + '%',
+                style: {
+                    fontSize: '10px',
+                    fontFamily: 'JetBrains Mono',
+                    colors: ['#fff']
+                },
+                offsetY: -20,
+                background: {
+                    enabled: true,
+                    foreColor: '#fff',
+                    padding: 4,
+                    borderRadius: 2,
+                    borderWidth: 0,
+                    backgroundColor: '#0c0f16',
+                    opacity: 1,
+                    dropShadow: { enabled: false }
+                }
+            },
+            grid: { borderColor: '#1e2633', strokeDashArray: 4 },
+            tooltip: { theme: 'dark' }
         }).render();
 
         // --- CORRELATION MATRIX ---
