@@ -74,6 +74,12 @@ class MacroEngine:
         try:
             df = yf.download(list(assets.keys()), period='6mo', progress=False)['Close']
             df = df.ffill().bfill()
+            # 21-day rolling momentum for history
+            momentum_df = df.pct_change(21).dropna()
+            momentum_history = {
+                'dates': momentum_df.index.strftime('%Y-%m-%d').tolist(),
+                'series': {k: (momentum_df[k] * 100).tolist() for k in assets}
+            }
             momentum = df.pct_change(21).iloc[-1].to_dict() # 21-day momentum
             
             # Growth Proxy: Copper / Gold ratio (Industrial vs Safe Haven)
@@ -90,6 +96,7 @@ class MacroEngine:
             correlation = df.corr().to_dict()
         except Exception:
             momentum = {k: 0.01 for k in assets}
+            momentum_history = {'dates': [], 'series': {k: [] for k in assets}}
             cg_ratio, cg_momentum, rotation_raw, tlt_vol = 0.0125, -0.11, -0.10, 15.0
             correlation = {k: {k2: 1.0 if k==k2 else 0.5 for k2 in assets} for k in assets}
 
@@ -138,6 +145,7 @@ class MacroEngine:
                 },
                 'market': {
                     'momentum': momentum,
+                    'momentum_history': momentum_history,
                     'cg_ratio': float(cg_ratio),
                     'cg_momentum': float(cg_momentum) if not np.isnan(cg_momentum) else 0.0,
                     'rotation_raw': float(rotation_raw),

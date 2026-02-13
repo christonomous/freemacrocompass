@@ -322,25 +322,62 @@
                 document.getElementById('spy-mom-val').className = `text-[10px] font-mono font-bold ${spyMom > 0 ? 'text-terminal-bullish' : 'text-terminal-bearish'}`;
                 document.getElementById('spy-mom-bar').style.width = Math.min(100, Math.max(0, (spyMom + 5) / 10 * 100)) + '%';
 
-                // --- MOMENTUM CHART ---
-                const momData = rawMkt.momentum;
-                new ApexCharts(document.querySelector("#momentum-chart"), {
-                    series: [{ name: '21D Return', data: Object.values(momData).map(v => (v * 100).toFixed(2)) }],
-                    chart: { type: 'bar', height: 280, toolbar: { show: false }, background: 'transparent' },
-                    plotOptions: { bar: { borderRadius: 6, distributed: true, dataLabels: { position: 'top' } } },
-                    colors: Object.values(momData).map(v => v >= 0 ? '#00ffa3' : '#ff2d55'),
-                    xaxis: { categories: Object.keys(momData), labels: { style: { colors: '#6b7280', fontFamily: 'JetBrains Mono', fontSize: '10px' } } },
-                    yaxis: { labels: { formatter: (v) => v + '%', style: { colors: '#6b7280', fontSize: '10px' } } },
-                    dataLabels: {
-                        enabled: true, formatter: (v) => v + '%', style: { fontSize: '10px', fontFamily: 'JetBrains Mono', colors: ['#fff'] },
-                        offsetY: -20, background: { enabled: true, foreColor: '#fff', padding: 4, borderRadius: 2, borderWidth: 0, backgroundColor: '#0c0f16', opacity: 1, dropShadow: { enabled: false } }
+                // --- MOMENTUM CHART (Line Chart) ---
+                const momHist = rawMkt.momentum_history;
+                const assetsList = Object.keys(momHist.series);
+                const chartSeries = assetsList.map(asset => ({
+                    name: asset,
+                    data: momHist.series[asset]
+                }));
+
+                const momentumChartOptions = {
+                    series: chartSeries,
+                    chart: {
+                        type: 'line',
+                        height: 800,
+                        toolbar: { show: false },
+                        background: 'transparent',
+                        animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 1000 } }
+                    },
+                    colors: ['#00f2ff', '#00ffa3', '#ff2d55', '#ffcc00', '#a855f7', '#fb923c', '#f43f5e'],
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: {
+                        categories: momHist.dates,
+                        type: 'datetime',
+                        labels: {
+                            style: { colors: '#6b7280', fontFamily: 'JetBrains Mono', fontSize: '10px' },
+                            datetimeFormatter: { month: 'MMM dd' }
+                        },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: {
+                        labels: {
+                            formatter: (v) => v.toFixed(1) + '%',
+                            style: { colors: '#6b7280', fontSize: '10px' }
+                        }
+                    },
+                    legend: {
+                        show: true,
+                        position: 'top',
+                        horizontalAlign: 'right',
+                        fontFamily: 'JetBrains Mono',
+                        fontSize: '10px',
+                        labels: { colors: '#6b7280' },
+                        markers: { radius: 12 }
                     },
                     grid: { borderColor: '#1e2633', strokeDashArray: 4 },
-                    tooltip: { theme: 'dark' }
-                }).render();
+                    tooltip: {
+                        theme: 'dark',
+                        x: { format: 'MMM dd, yyyy' },
+                        y: { formatter: (v) => v.toFixed(2) + '%' }
+                    }
+                };
+
+                new ApexCharts(document.querySelector("#momentum-chart"), momentumChartOptions).render();
 
                 // --- CORRELATION MATRIX ---
-                const assets = Object.keys(momData);
+                const assets = Object.keys(rawMkt.momentum);
                 const corel = rawMkt.correlation;
                 const matrixEl = document.getElementById('corr-matrix');
                 if (assets.length > 0 && corel['SPY']) {
