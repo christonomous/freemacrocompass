@@ -16,6 +16,9 @@ class MacroEngine:
         self.fred_key = os.getenv("FRED_API_KEY")
         self.av_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         self.fred = Fred(api_key=self.fred_key) if self.fred_key else None
+        self._cache = None
+        self._last_calc = None
+        self._cache_ttl = 300 # 5 minutes
 
     def get_net_liquidity(self):
         """Calculate Net Liquidity: WALCL (Balance Sheet) - WTGANN (TGA) - RRPONTSYD (RRP)"""
@@ -30,7 +33,11 @@ class MacroEngine:
             return 6.5e12
 
     def calculate_regime(self):
-        """Fetch data and calculate the advanced institutional regime score."""
+        """Fetch data and calculate the advanced institutional regime score. Includes 5-min caching."""
+        now = datetime.now()
+        if self._cache and self._last_calc and (now - self._last_calc).total_seconds() < self._cache_ttl:
+            return self._cache
+
         # 1. Advanced Macro (FRED)
         try:
             if self.fred:
@@ -108,7 +115,7 @@ class MacroEngine:
         composite = (s_liquidity * 0.25) + (s_credit * 0.20) + (s_conditions * 0.15) + \
                     (s_growth * 0.15) + (s_rotation * 0.15) + (s_sentiment * 0.10)
 
-        return {
+        result = {
             'composite': float(np.clip(composite, -1, 1)),
             'components': {
                 'Liquidity': float(s_liquidity),
@@ -139,3 +146,6 @@ class MacroEngine:
                 }
             }
         }
+        self._cache = result
+        self._last_calc = now
+        return result
