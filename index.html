@@ -191,6 +191,7 @@
             <div class="xl:col-span-2 glass rounded-2xl p-6 overflow-hidden">
                 <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-6">Cross-Asset
                     Alignment (1M Correlation)</p>
+                <div id="correlation-summary" class="mb-6"></div>
                 <div class="overflow-x-auto no-scrollbar">
                     <table class="w-full text-[11px] font-mono border-collapse" id="corr-matrix">
                         <!-- Dynamic -->
@@ -446,6 +447,64 @@
                 // --- CORRELATION MATRIX ---
                 const assets = Object.keys(rawMkt.momentum);
                 const corel = rawMkt.correlation;
+
+                // --- CORRELATION DYNAMIC SUMMARY ---
+                if (assets.length > 0 && corel['SPY']) {
+                    let pairs = [];
+                    assets.forEach((r, i) => {
+                        assets.forEach((c, j) => {
+                            if (i < j) { // Only unique pairs, exclude identity
+                                pairs.push({ p: [r, c], v: corel[r][c] || 0 });
+                            }
+                        });
+                    });
+
+                    const sortedPairs = [...pairs].sort((a, b) => b.v - a.v);
+                    const strongestPair = sortedPairs[0];
+                    const weakestPair = sortedPairs[sortedPairs.length - 1];
+                    const avgAbsCorr = pairs.reduce((acc, p) => acc + Math.abs(p.v), 0) / pairs.length;
+
+                    let corrConclusion = "";
+                    if (avgAbsCorr > 0.6) {
+                        corrConclusion = "Strong Systemic Tie-In. High correlation across all asset classes indicates a macro-dominated environment where 'Everything is one trade' (likely Liquidity or Dollar driven).";
+                    } else if (avgAbsCorr < 0.3) {
+                        corrConclusion = "High Market Dispersion. Assets are moving independently, suggesting a stock-picker's market with idiosyncratic sector rotations and low systemic stress.";
+                    } else {
+                        corrConclusion = "Balanced Structural Alignment. Standard correlation levels suggest normal market functioning without extreme systemic synchronization.";
+                    }
+
+                    // Check for key hedges
+                    const spyGld = corel['SPY'] && corel['SPY']['GLD'] !== undefined ? corel['SPY']['GLD'] : 0;
+                    if (spyGld < -0.4) {
+                        corrConclusion += " Notable active hedge between Equities and Gold.";
+                    }
+
+                    document.getElementById('correlation-summary').innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border border-white/5 bg-white/[0.02] rounded-xl p-4">
+                            <div class="md:col-span-2">
+                                <span class="text-[10px] font-mono text-terminal-accent uppercase tracking-widest mb-2 block">Alignment Insight</span>
+                                <p class="text-xs font-sans text-white/80 leading-relaxed italic border-l-2 border-terminal-accent/30 pl-3">
+                                    "${corrConclusion}"
+                                </p>
+                            </div>
+                            <div class="flex flex-col justify-center space-y-2 border-t md:border-t-0 md:border-l border-white/5 pt-3 md:pt-0 md:pl-4">
+                                <div class="flex justify-between items-center text-[9px] font-mono">
+                                    <span class="text-terminal-muted uppercase">Tightest Coupling</span>
+                                    <span class="text-terminal-bullish font-bold">${strongestPair.p.join('/')} (${strongestPair.v.toFixed(2)})</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[9px] font-mono">
+                                    <span class="text-terminal-muted uppercase">Max Decoupling</span>
+                                    <span class="text-terminal-bearish font-bold">${weakestPair.p.join('/')} (${weakestPair.v.toFixed(2)})</span>
+                                </div>
+                                <div class="flex justify-between items-center text-[9px] font-mono">
+                                    <span class="text-terminal-muted uppercase">Systemic Tension</span>
+                                    <span class="text-white font-bold">${(avgAbsCorr * 10).toFixed(1)}/10</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const matrixEl = document.getElementById('corr-matrix');
                 if (assets.length > 0 && corel['SPY']) {
                     let html = '<thead><tr class="text-terminal-muted border-b border-white/5"><th class="p-3 text-left">ASSET</th>' + assets.map(a => `<th class="p-3 text-center">${a}</th>`).join('') + '</tr></thead><tbody>';
