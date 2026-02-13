@@ -77,7 +77,7 @@
                 <div class="flex items-center space-x-3">
                     <img src="https://revoro.consulting/logo_light.svg" class="h-10 w-auto" alt="Revoro Logo">
                     <h1 class="text-2xl font-mono font-bold tracking-tighter text-white">GLOBAL MACRO TERMINAL <span
-                            class="text-terminal-accent">v4.5</span></h1>
+                            class="text-terminal-accent">v2.5</span></h1>
                 </div>
                 <p class="text-[10px] text-terminal-muted font-mono mt-1 tracking-[0.2em] uppercase">Quantitative Alpha
                     Selection // Systemic Risk Monitoring</p>
@@ -222,7 +222,7 @@
             <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-[0.2em] italic">Proprietary Alpha
                 Discovery</p>
             <div class="flex items-center space-x-6">
-                <p class="text-[10px] font-mono text-terminal-muted">LICENSE: INSTITUTIONAL-FREE-TIER</p>
+                <p class="text-[10px] font-mono text-terminal-muted">LICENSE: FREE-TIER</p>
                 <a href="https://calendly.com/chrisberlin/session" target="_blank"
                     class="px-6 py-2 bg-terminal-accent/10 border border-terminal-accent/30 text-terminal-accent font-mono text-[10px] uppercase tracking-widest rounded-lg hover:bg-terminal-accent/20 transition-all">Strategic
                     Session →</a>
@@ -242,7 +242,7 @@
                 document.getElementById('nav-liq').innerText = `$${(DATA.raw.fred.net_liquidity / 1e12).toFixed(2)}T`;
 
                 const score = DATA.composite;
-                const color = score > 0.2 ? '#00ffa3' : (score < -0.2 ? '#ff2d55' : '#6b7280');
+                const color = score > 0 ? '#00ffa3' : (score < 0 ? '#ff2d55' : '#6b7280');
                 const text = score > 0.3 ? 'HEAVY BULLISH' : (score > 0.1 ? 'SOFT BULLISH' : (score < -0.3 ? 'HEAVY BEARISH' : (score < -0.1 ? 'SOFT BEARISH' : 'TRANSITION')));
 
                 document.getElementById('regime-label').innerText = text;
@@ -284,12 +284,12 @@
                 // --- RISK MATRIX ---
                 const fred = DATA.raw.fred;
                 const matrixItems = [
-                    { l: 'HY Credit Spread', v: fred.hy_spread.toFixed(2) + '%', d: 'BAML OAS vs Treasuries', s: fred.hy_spread < 4.5 ? 1 : -1 },
-                    { l: 'Monetary Index (NFCI)', v: fred.nfci.toFixed(2), d: 'Chicago Fed Conditions', s: fred.nfci < 0 ? 1 : -1 },
+                    { l: 'HY Credit Spread', v: fred.hy_spread.toFixed(2) + '%', d: 'BAML OAS vs Treasuries', s: fred.hy_spread > 0 ? 1 : -1 },
+                    { l: 'Monetary Index (NFCI)', v: fred.nfci.toFixed(2), d: 'Chicago Fed Conditions', s: fred.nfci > 0 ? 1 : -1 },
                     { l: '10Y - 3M Yield Spread', v: fred.yield_10y3m.toFixed(2) + '%', d: 'Recession Signal', s: fred.yield_10y3m > 0 ? 1 : -1 },
-                    { l: 'Fed Stress Index', v: fred.stress_index.toFixed(2), d: 'St. Louis Fed Risk Proxy', s: fred.stress_index < 0 ? 1 : -1 },
-                    { l: 'MOVE (Bond Vol)', v: DATA.raw.market.tlt_vol.toFixed(1) + '%', d: 'MOVE Index Proxy (TLV)', s: DATA.raw.market.tlt_vol < 18 ? 1 : -1 },
-                    { l: 'Real Yield (10Y)', v: fred.real_yield.toFixed(2) + '%', d: 'Fed Policy Restrictiveness', s: fred.real_yield < 2.5 ? 0 : -1 }
+                    { l: 'Fed Stress Index', v: fred.stress_index.toFixed(2), d: 'St. Louis Fed Risk Proxy', s: fred.stress_index > 0 ? 1 : -1 },
+                    { l: 'MOVE (Bond Vol)', v: DATA.raw.market.tlt_vol.toFixed(1) + '%', d: 'MOVE Index Proxy (TLV)', s: DATA.raw.market.tlt_vol > 0 ? 1 : -1 },
+                    { l: 'Real Yield (10Y)', v: fred.real_yield.toFixed(2) + '%', d: 'Fed Policy Restrictiveness', s: fred.real_yield > 0 ? 1 : -1 }
                 ];
 
                 document.getElementById('risk-matrix').innerHTML = matrixItems.map(item => `
@@ -350,8 +350,11 @@
                         assets.forEach(c => {
                             const v = (corel[r] && corel[r][c] !== undefined) ? corel[r][c] : 0;
                             const intensity = Math.abs(v);
-                            const color = v > 0.5 ? `rgba(0, 255, 163, ${intensity * 0.2})` : (v < -0.5 ? `rgba(255, 45, 85, ${intensity * 0.2})` : 'transparent');
-                            html += `<td class="p-3 text-center border-l border-white/5" style="background: ${color}">${v.toFixed(2)}</td>`;
+                            // Neutralize identity correlation (self-compare)
+                            const isIdentity = (r === c);
+                            const color = isIdentity ? 'transparent' : (v > 0.5 ? `rgba(0, 255, 163, ${intensity * 0.2})` : (v < -0.5 ? `rgba(255, 45, 85, ${intensity * 0.2})` : 'transparent'));
+                            const opacity = isIdentity ? 'opacity-30' : '';
+                            html += `<td class="p-3 text-center border-l border-white/5 ${opacity}" style="background: ${color}">${v.toFixed(2)}</td>`;
                         });
                         html += '</tr>';
                     });

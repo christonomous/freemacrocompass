@@ -2,7 +2,7 @@
 
 A high-density, institutional-grade market intelligence engine designed for quantitative alpha selection and systemic risk monitoring.
 
-![Status](https://img.shields.io/badge/Status-v4.5--Institutional-cyan)
+![Status](https://img.shields.io/badge/Status-v2.5--Institutional-cyan)
 ![Tech](https://img.shields.io/badge/Architecture-API--First-blue)
 ![Caching](https://img.shields.io/badge/Cache-5--Min%20TTL-brightgreen)
 
