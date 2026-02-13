@@ -60,7 +60,10 @@
     <main class="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
         <section class="glass rounded-2xl p-8 relative overflow-hidden">
             <div class="absolute inset-0 shimmer opacity-20"></div>
-            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Market Regime Score</h2>
+            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Market Regime Score</h2>
+            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">A weighted composite of growth, inflation,
+                and momentum. Tells you if the aggregate market is in an expansionary (Risk-On) or contractionary
+                (Risk-Off) state.</p>
             <div id="gauge" class="h-64"></div>
             <div class="text-center mt-4">
                 <span id="label"
@@ -69,12 +72,18 @@
         </section>
 
         <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Global Sentiment Pulse</h2>
+            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Global Sentiment Pulse</h2>
+            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">Real-time news sentiment from the top 50
+                global financial headlines. Bullish volume indicates speculative appetite, while Bearish volume suggests
+                fear-driven hedging.</p>
             <div id="sentiment" class="h-64"></div>
         </section>
 
         <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Asset Correlation (1M)</h2>
+            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Asset Correlation (1M)</h2>
+            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">Measures how assets move together. High
+                correlation across disjointed asset classes (e.g., Gold & Stocks) often signals systemic stress or
+                liquidity events.</p>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm font-mono border-collapse" id="corr">
                     <!-- Dynamic Table -->
@@ -83,7 +92,9 @@
         </section>
 
         <section class="glass rounded-2xl p-8">
-            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Macro Pulse Checklist</h2>
+            <h2 class="font-mono text-lg font-bold mb-2 text-white/70 uppercase">Macro Pulse Checklist</h2>
+            <p class="text-xs text-white/40 mb-6 font-mono leading-relaxed">The fundamental building blocks of the
+                Regime Score. Tracks the Yield Curve (recession risk), CPI (purchasing power), and S&P 500 momentum.</p>
             <div class="space-y-6" id="pulse"></div>
             <div class="mt-8 pt-6 border-t border-white/10">
                 <p class="text-xs font-mono text-white/40 uppercase">Fed Funds Rate</p>
@@ -101,7 +112,7 @@
 
     <script id="macro-data">
         // --- DATA INJECTION POINT ---
-        const DATA = {"composite": 0.3614379847849986, "components": {"Growth": 1.0, "Inflation": -0.19560071607500706, "Momentum": 0.0, "Sentiment": 0.5027906400000001}, "raw": {"fred": {"yield_curve": 0.62, "inflation": 2.391201432150014, "fed_funds": 3.64}, "market": {"momentum": {"GLD": 0.0, "SPY": 0.0, "USO": 0.0, "^GDAXI": 0.001977668884395989, "^N225": -0.012107443317708522}, "correlation": {"GLD": {"GLD": 1.0, "SPY": 0.22181523043537005, "USO": 0.6310669477907993, "^GDAXI": -0.4998970087782845, "^N225": 0.17643300695700787}, "SPY": {"GLD": 0.22181523043537005, "SPY": 1.0, "USO": 0.09971587659137389, "^GDAXI": 0.31581161252743384, "^N225": -0.1694029816451352}, "USO": {"GLD": 0.6310669477907993, "SPY": 0.09971587659137389, "USO": 1.0, "^GDAXI": -0.5569858240804347, "^N225": 0.4287765279995421}, "^GDAXI": {"GLD": -0.4998970087782845, "SPY": 0.31581161252743384, "USO": -0.5569858240804347, "^GDAXI": 1.0, "^N225": 0.16731095397818171}, "^N225": {"GLD": 0.17643300695700787, "SPY": -0.1694029816451352, "USO": 0.4287765279995421, "^GDAXI": 0.16731095397818171, "^N225": 1.0}}}}};
+        const DATA = { "composite": 0.3614379847849986, "components": { "Growth": 1.0, "Inflation": -0.19560071607500706, "Momentum": 0.0, "Sentiment": 0.5027906400000001 }, "raw": { "fred": { "yield_curve": 0.62, "inflation": 2.391201432150014, "fed_funds": 3.64 }, "market": { "momentum": { "GLD": 0.0, "SPY": 0.0, "USO": 0.0, "^GDAXI": 0.001977668884395989, "^N225": -0.012107443317708522 }, "correlation": { "GLD": { "GLD": 1.0, "SPY": 0.22181523043537005, "USO": 0.6310669477907993, "^GDAXI": -0.4998970087782845, "^N225": 0.17643300695700787 }, "SPY": { "GLD": 0.22181523043537005, "SPY": 1.0, "USO": 0.09971587659137389, "^GDAXI": 0.31581161252743384, "^N225": -0.1694029816451352 }, "USO": { "GLD": 0.6310669477907993, "SPY": 0.09971587659137389, "USO": 1.0, "^GDAXI": -0.5569858240804347, "^N225": 0.4287765279995421 }, "^GDAXI": { "GLD": -0.4998970087782845, "SPY": 0.31581161252743384, "USO": -0.5569858240804347, "^GDAXI": 1.0, "^N225": 0.16731095397818171 }, "^N225": { "GLD": 0.17643300695700787, "SPY": -0.1694029816451352, "USO": 0.4287765279995421, "^GDAXI": 0.16731095397818171, "^N225": 1.0 } } } } };
         // --- END DATA INJECTION ---
 
         document.getElementById('date').innerText = new Date().toISOString().split('T')[0];
