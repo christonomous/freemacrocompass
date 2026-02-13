@@ -1,18 +1,20 @@
-# 🧭 Global Macro Compass
+# 🧭 Global Macro Terminal
 
-A high-signal, "Zero-Touch" market intelligence engine designed for quantitative strategy development.
+A high-density, institutional-grade market intelligence engine designed for quantitative alpha selection and systemic risk monitoring.
 
-![Global Macro Compass](https://img.shields.io/badge/Status-Freemium-brightgreen)
-![Tech](https://img.shields.io/badge/Tech-Python%20|%20Flask%20|%20Tailwind-blue)
+![Status](https://img.shields.io/badge/Status-v4.5--Institutional-cyan)
+![Tech](https://img.shields.io/badge/Architecture-API--First-blue)
+![Caching](https://img.shields.io/badge/Cache-5--Min%20TTL-brightgreen)
 
 ## 📡 The Engine
-The **Global Macro Compass** automatically aggregates critical financial pulses—**Growth, Inflation, Liquidity, and Sentiment**—into a single, visually stunning dashboard. It calculates a real-time **Market Regime Score** to help identify whether the current environment is **Risk-On**, **Risk-Off**, or **Neutral**.
+The **Global Macro Terminal** aggregates critical systemic pulses—**Liquidity, Credit, Growth, and Volatility**—into a professional "Single-Pane-Of-Glass" dashboard. It calculates a real-time **Market Regime Score** based on weighted institutional proxies to identify **Risk-On** vs **Risk-Off** regimes.
 
-### Features:
-- **Composite Alpha Signal**: Weighted scoring logic based on 10Y-2Y Spreads, CPI, Fed Funds Rate, and Asset Momentum.
-- **Dynamic Heatmaps**: Visualization of asset correlations across S&P 500, Gold, Oil, and Global Indices.
-- **Sentiment Pulse**: High-frequency news sentiment analysis powered by Alpha Vantage.
-- **Standalone Dashboard**: A premium, 2026-styled UI using Tailwind CSS and ApexCharts.
+### Institutional Features:
+- **Systemic Plumbing Matrix**: High-density 6-point matrix tracking **Bond Volatility (MOVE)**, **St. Louis Fed Stress Index**, **Credit Spreads (HY)**, **NFCI**, **Yield Curve (10Y-3M)**, and **Real Yields**.
+- **Growth & Momentum Pulse**: Leading economic signals via **Copper/Gold Ratio**, **XLK/XLP Rotation**, and **Beta (SPY) Momentum**.
+- **API-First Architecture**: Decoupled backend exposing data via `/api/macro` JSON endpoint with **5-minute TTL caching** for multi-client scalability.
+- **Premium Terminal UI**: v4.5 "Glassmorphism" interface with **JetBrains Mono** typography and real-time **ApexCharts** visualizations.
+- **Data Hardening**: Robust momentum engine with automated `.fillna()` logic to ensure continuous live streams during market stress.
 
 ---
 
