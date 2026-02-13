@@ -144,6 +144,7 @@
             <div class="xl:col-span-1 glass rounded-2xl p-6">
                 <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-6">Growth & Momentum
                     Pulse</p>
+                <div id="growth-summary" class="mb-6"></div>
                 <div class="space-y-8">
                     <!-- Copper/Gold (Leading Growth) -->
                     <div>
@@ -323,6 +324,41 @@
                 document.getElementById('spy-mom-val').innerText = (spyMom > 0 ? '+' : '') + spyMom.toFixed(2) + '%';
                 document.getElementById('spy-mom-val').className = `text-[10px] font-mono font-bold ${spyMom > 0 ? 'text-terminal-bullish' : 'text-terminal-bearish'}`;
                 document.getElementById('spy-mom-bar').style.width = Math.min(100, Math.max(0, (spyMom + 5) / 10 * 100)) + '%';
+
+                // --- GROWTH & MOMENTUM DYNAMIC SUMMARY ---
+                let growthConclusion = "";
+                let growthStatus = "NEUTRAL";
+                let growthColor = "text-terminal-accent";
+
+                if (cgMomRaw > 1 && rotVal > 1) {
+                    growthConclusion = "Strong economic acceleration signaling. Expansionary leadership in industrial commodities and high-beta tech sectors suggests a robust cyclical uptrend.";
+                    growthStatus = "EXPANSION";
+                    growthColor = "text-terminal-bullish";
+                } else if (cgMomRaw < -1 && rotVal < -1) {
+                    growthConclusion = "Signs of economic cooling or contraction. Defensive rotation and safe-haven demand (Gold) indicate institutional positioning for a growth slowdown or recessionary risk.";
+                    growthStatus = "CONTRACTION";
+                    growthColor = "text-terminal-bearish";
+                } else if (cgMomRaw > 1 && rotVal < -1) {
+                    growthConclusion = "Divergent growth signals. While industrial demand (Copper) remains firm, equity markets are rotating defensively. This typically precedes a broader structural transition.";
+                    growthStatus = "DIVERGING";
+                } else if (cgMomRaw < -1 && rotVal > 1) {
+                    growthConclusion = "Liquidity-driven expansion. Weak industrial momentum but strong speculative tech rotation suggests market growth is being fueled more by liquidity than fundamental expansion.";
+                    growthStatus = "LIQUIDITY-DRIVEN";
+                } else {
+                    growthConclusion = "Equilibrium regime. Growth signals are currently balanced without extreme directional bias in leading economic indicators.";
+                }
+
+                document.getElementById('growth-summary').innerHTML = `
+                    <div class="p-4 rounded-xl border border-white/5 bg-white/[0.02] relative overflow-hidden">
+                        <div class="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                            <span class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest">Growth Signal</span>
+                            <span class="text-[10px] font-mono ${growthColor} font-bold px-2 py-0.5 border border-current/20 rounded">${growthStatus}</span>
+                        </div>
+                        <p class="text-[11px] font-sans text-white/80 leading-relaxed italic">
+                            "${growthConclusion}"
+                        </p>
+                    </div>
+                `;
 
                 // --- DYNAMIC SUMMARIZATION ---
                 const rawMom = rawMkt.momentum;
