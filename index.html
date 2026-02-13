@@ -120,6 +120,7 @@
             <!-- Risk Radar (6 pillars) -->
             <div class="xl:col-span-1 glass rounded-2xl p-6">
                 <p class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest mb-4">Strategic Radar</p>
+                <div id="radar-summary" class="mb-4"></div>
                 <div id="radar" class="h-64"></div>
             </div>
 
@@ -284,6 +285,38 @@
                     grid: { padding: { left: 10, right: 10 } },
                     tooltip: { theme: 'dark' }
                 }).render();
+
+                // --- RADAR DYNAMIC SUMMARY ---
+                const radarEntries = Object.entries(DATA.components).sort((a, b) => b[1] - a[1]);
+                const dominantPillar = radarEntries[0];
+                const weakestPillar = radarEntries[radarEntries.length - 1];
+
+                let radarConclusion = "";
+                if (dominantPillar[0] === 'Liquidity' || dominantPillar[0] === 'Monetary') {
+                    radarConclusion = "Market is heavily liquidity-driven. Systemic plumbing and central bank posture are the primary anchors of the current regime, overriding fundamental growth concerns.";
+                } else if (dominantPillar[0] === 'Appetite' || dominantPillar[0] === 'Sentiment') {
+                    radarConclusion = "Animal spirits are in control. Risk appetite and speculative sentiment are the main engines of price action, reflecting high institutional confidence.";
+                } else if (dominantPillar[0] === 'Growth') {
+                    radarConclusion = "Fundamentals are leading the charge. Strong economic growth signals are the primary driver, suggesting a healthy expansionary phase.";
+                } else if (dominantPillar[0] === 'Credit') {
+                    radarConclusion = "Credit markets are providing the tailwind. Tightening spreads and robust financial conditions are supporting broad market stability.";
+                }
+
+                if (weakestPillar[1] < -0.3) {
+                    radarConclusion += ` However, ${weakestPillar[0]} represents a significant point of friction that could challenge the current trend.`;
+                }
+
+                document.getElementById('radar-summary').innerHTML = `
+                    <div class="p-3 rounded-xl border border-white/5 bg-white/[0.02]">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <div class="w-1.5 h-1.5 bg-terminal-accent rounded-full shadow-[0_0_8px_#00f2ff]"></div>
+                            <span class="text-[9px] font-mono text-terminal-muted uppercase tracking-widest">Strategic Pulse</span>
+                        </div>
+                        <p class="text-[10px] font-sans text-white/70 leading-relaxed">
+                            <span class="text-terminal-accent font-bold">PRIMARY DRIVER: ${dominantPillar[0].toUpperCase()}</span>. ${radarConclusion}
+                        </p>
+                    </div>
+                `;
 
                 // --- RISK MATRIX ---
                 const fred = DATA.raw.fred;
