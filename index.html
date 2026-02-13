@@ -212,6 +212,7 @@
                         </div>
                     </div>
                 </div>
+                <div id="momentum-summary" class="mb-4"></div>
                 <div id="momentum-chart" class="h-72"></div>
             </div>
         </div>
@@ -321,6 +322,72 @@
                 document.getElementById('spy-mom-val').innerText = (spyMom > 0 ? '+' : '') + spyMom.toFixed(2) + '%';
                 document.getElementById('spy-mom-val').className = `text-[10px] font-mono font-bold ${spyMom > 0 ? 'text-terminal-bullish' : 'text-terminal-bearish'}`;
                 document.getElementById('spy-mom-bar').style.width = Math.min(100, Math.max(0, (spyMom + 5) / 10 * 100)) + '%';
+
+                // --- DYNAMIC SUMMARIZATION ---
+                const rawMom = rawMkt.momentum;
+                const assetNames = {
+                    'SPY': 'S&P 500',
+                    'GLD': 'Gold',
+                    'HG=F': 'Copper',
+                    'DX-Y.NYB': 'US Dollar',
+                    'TLT': 'Long-Term Bonds',
+                    'XLK': 'Technology',
+                    'XLP': 'Consumer Staples'
+                };
+
+                const sortedMom = Object.entries(rawMom).sort((a, b) => b[1] - a[1]);
+                const leader = sortedMom[0];
+                const laggard = sortedMom[sortedMom.length - 1];
+                const positiveBreadth = (Object.values(rawMom).filter(v => v > 0).length / Object.keys(rawMom).length) * 100;
+
+                let conclusion = "";
+                let conclusionColor = "text-terminal-accent";
+
+                if (leader[0] === 'XLK' || (leader[0] === 'SPY' && rawMom['XLK'] > 0)) {
+                    conclusion = "Market exhibiting strong Risk-On expansion. Technology leads the momentum sequence, suggesting high institutional risk appetite and growth-oriented capital allocation.";
+                    conclusionColor = "text-terminal-bullish";
+                } else if (leader[0] === 'GLD' || (leader[0] === 'TLT' && rawMom['GLD'] > 0)) {
+                    conclusion = "Defensive rotation detected. Leadership in Gold and Bonds indicates a 'Flight to Quality' regime, often preceding volatility or reflecting macro-uncertainty.";
+                    conclusionColor = "text-terminal-bearish";
+                } else if (leader[0] === 'DX-Y.NYB') {
+                    conclusion = "Dollar strength is dominating the cross-asset landscape. This typically exerts downward pressure on global liquidity and suggests a 'Cash is King' defensive posture.";
+                    conclusionColor = "text-terminal-bearish";
+                } else if (leader[0] === 'HG=F') {
+                    conclusion = "Industrial momentum is leading. Strong Copper performance relative to Gold suggests professional expectations of a cyclical economic recovery and industrial expansion.";
+                    conclusionColor = "text-terminal-bullish";
+                } else if (rawMom['XLP'] > rawMom['XLK'] && rawMom['XLP'] > 0) {
+                    conclusion = "Late-cycle defensive positioning. Consumer Staples are outperforming Tech, signaling an institutional shift toward stable yield and recession-resistant sectors.";
+                } else {
+                    conclusion = "Market is in an undecisive structural transition. Momentum is fragmented across asset classes without a clear directional theme or sector leadership.";
+                }
+
+                document.getElementById('momentum-summary').innerHTML = `
+                    <div class="p-5 rounded-xl border border-white/5 bg-white/[0.02] relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1 h-full ${leader[1] > 0 ? 'bg-terminal-bullish' : 'bg-terminal-bearish'}"></div>
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <span class="text-[10px] font-mono text-terminal-accent font-bold uppercase tracking-widest">Decision Narrative</span>
+                                    <span class="h-px w-8 bg-white/10"></span>
+                                    <span class="text-[10px] font-mono text-terminal-muted uppercase">Breadth: ${positiveBreadth.toFixed(0)}% Bullish</span>
+                                </div>
+                                <p class="text-sm font-sans text-white/90 leading-relaxed italic border-l-2 border-terminal-accent/20 pl-4 py-1">
+                                    "${conclusion}"
+                                </p>
+                            </div>
+                            <div class="flex flex-col space-y-3 min-w-[200px] border-l border-white/5 pl-6">
+                                <div>
+                                    <p class="text-[9px] font-mono text-terminal-muted uppercase">Alpha Leader</p>
+                                    <p class="text-xs font-mono font-bold text-terminal-bullish">${assetNames[leader[0]] || leader[0]} <span class="ml-1 opacity-70">(+${(leader[1] * 100).toFixed(2)}%)</span></p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-mono text-terminal-muted uppercase">Relative Laggard</p>
+                                    <p class="text-xs font-mono font-bold text-terminal-bearish">${assetNames[laggard[0]] || laggard[0]} <span class="ml-1 opacity-70">(${(laggard[1] * 100).toFixed(2)}%)</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
 
                 // --- MOMENTUM CHART (Line Chart) ---
                 const momHist = rawMkt.momentum_history;
