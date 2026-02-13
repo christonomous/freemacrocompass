@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Macro Compass | Zero-Touch Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;600&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { mono: ['"JetBrains Mono"'], sans: ['Outfit'] }, colors: { dark: '#0a0e14', accent: '#00f2ff', bullish: '#00ff88', bearish: '#ff3366' } } }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0e14;
+            color: #e0e0e0;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(0, 242, 255, 0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: -200% 0;
+            }
+
+            100% {
+                background-position: 200% 0;
+            }
+        }
+    </style>
+</head>
+
+<body class="font-sans min-h-screen pb-24">
+    <header class="p-8 border-b border-white/10 flex justify-between items-center">
+        <div>
+            <h1 class="font-mono text-3xl font-bold tracking-tighter text-accent">🧭 GLOBAL MACRO COMPASS</h1>
+            <p class="text-sm text-white/50 font-mono mt-1">V2026.1 // ALPHA STRATEGY ENGINE</p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs font-mono text-white/40 uppercase">LAST PULSE</p>
+            <p class="text-lg font-mono" id="date">--</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <section class="glass rounded-2xl p-8 relative overflow-hidden">
+            <div class="absolute inset-0 shimmer opacity-20"></div>
+            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Market Regime Score</h2>
+            <div id="gauge" class="h-64"></div>
+            <div class="text-center mt-4">
+                <span id="label"
+                    class="text-4xl font-bold font-mono tracking-widest px-4 py-2 rounded-lg border-2">CALCULATING...</span>
+            </div>
+        </section>
+
+        <section class="glass rounded-2xl p-8">
+            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Global Sentiment Pulse</h2>
+            <div id="sentiment" class="h-64"></div>
+        </section>
+
+        <section class="glass rounded-2xl p-8">
+            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Asset Correlation (1M)</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm font-mono border-collapse" id="corr">
+                    <!-- Dynamic Table -->
+                </table>
+            </div>
+        </section>
+
+        <section class="glass rounded-2xl p-8">
+            <h2 class="font-mono text-lg font-bold mb-6 text-white/70 uppercase">Macro Pulse Checklist</h2>
+            <div class="space-y-6" id="pulse"></div>
+            <div class="mt-8 pt-6 border-t border-white/10">
+                <p class="text-xs font-mono text-white/40 uppercase">Fed Funds Rate</p>
+                <p class="text-5xl font-bold text-accent font-mono mt-1" id="funds">--%</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 w-full glass border-t border-accent/30 py-4 text-center z-50">
+        <p class="font-mono text-sm">
+            WANT PROPRIETARY ALPHA? <a href="https://calendly.com/chrisberlin/session" target="_blank"
+                class="text-accent font-bold ml-2 underline">BOOK A STRATEGIC SESSION →</a>
+        </p>
+    </footer>
+
+    <script id="macro-data">
+        // --- DATA INJECTION POINT ---
+        const DATA = {"composite": 0.3614379847849986, "components": {"Growth": 1.0, "Inflation": -0.19560071607500706, "Momentum": 0.0, "Sentiment": 0.5027906400000001}, "raw": {"fred": {"yield_curve": 0.62, "inflation": 2.391201432150014, "fed_funds": 3.64}, "market": {"momentum": {"GLD": 0.0, "SPY": 0.0, "USO": 0.0, "^GDAXI": 0.001977668884395989, "^N225": -0.012107443317708522}, "correlation": {"GLD": {"GLD": 1.0, "SPY": 0.22181523043537005, "USO": 0.6310669477907993, "^GDAXI": -0.4998970087782845, "^N225": 0.17643300695700787}, "SPY": {"GLD": 0.22181523043537005, "SPY": 1.0, "USO": 0.09971587659137389, "^GDAXI": 0.31581161252743384, "^N225": -0.1694029816451352}, "USO": {"GLD": 0.6310669477907993, "SPY": 0.09971587659137389, "USO": 1.0, "^GDAXI": -0.5569858240804347, "^N225": 0.4287765279995421}, "^GDAXI": {"GLD": -0.4998970087782845, "SPY": 0.31581161252743384, "USO": -0.5569858240804347, "^GDAXI": 1.0, "^N225": 0.16731095397818171}, "^N225": {"GLD": 0.17643300695700787, "SPY": -0.1694029816451352, "USO": 0.4287765279995421, "^GDAXI": 0.16731095397818171, "^N225": 1.0}}}}};
+        // --- END DATA INJECTION ---
+
+        document.getElementById('date').innerText = new Date().toISOString().split('T')[0];
+
+        const score = DATA.composite;
+        const color = score > 0.3 ? '#00ff88' : (score < -0.3 ? '#ff3366' : '#ffffff');
+        const text = score > 0.3 ? 'RISK-ON' : (score < -0.3 ? 'RISK-OFF' : 'NEUTRAL');
+
+        document.getElementById('label').innerText = text;
+        document.getElementById('label').style.color = color;
+        document.getElementById('label').style.borderColor = color;
+
+        new ApexCharts(document.querySelector("#gauge"), {
+            series: [((score + 1) / 2) * 100],
+            chart: { height: 350, type: 'radialBar' },
+            plotOptions: {
+                radialBar: {
+                    startAngle: -90,
+                    endAngle: 90,
+                    track: { background: "#333" },
+                    dataLabels: { value: { offsetY: -2, color: '#fff', formatter: () => score.toFixed(2) } }
+                }
+            },
+            fill: { colors: [color] },
+            labels: ['Score'],
+        }).render();
+
+        new ApexCharts(document.querySelector("#sentiment"), {
+            series: [{ data: [Math.max(0, -DATA.components.Sentiment), 1 - Math.abs(DATA.components.Sentiment), Math.max(0, DATA.components.Sentiment)] }],
+            chart: { type: 'bar', height: 250, toolbar: { show: false } },
+            colors: ['#ff3366', '#888888', '#00ff88'],
+            plotOptions: { bar: { distributed: true, borderRadius: 4 } },
+            xaxis: { categories: ['Bearish', 'Neutral', 'Bullish'], labels: { style: { colors: '#fff' } } },
+            grid: { show: false },
+            legend: { show: false }
+        }).render();
+
+        const corrTable = document.getElementById('corr');
+        const assets = Object.keys(DATA.raw.market.correlation);
+        if (assets.length > 0) {
+            let html = '<thead><tr class="text-white/40"><th></th>' + assets.map(a => `<th class="p-2">${a}</th>`).join('') + '</tr></thead><tbody>';
+            assets.forEach(r => {
+                html += `<tr><td class="p-2 font-bold">${r}</td>`;
+                assets.forEach(c => {
+                    const v = DATA.raw.market.correlation[r][c];
+                    const cl = v > 0.5 ? 'bg-bullish/20' : (v < -0.5 ? 'bg-bearish/20' : 'bg-white/5');
+                    html += `<td class="p-2 ${cl} border border-white/5">${v.toFixed(2)}</td>`;
+                });
+                html += '</tr>';
+            });
+            corrTable.innerHTML = html + '</tbody>';
+        }
+
+        const pulseItems = [
+            { l: 'Growth (Yield Curve)', v: DATA.raw.fred.yield_curve.toFixed(2), s: DATA.components.Growth },
+            { l: 'Inflation (CPI YoY)', v: DATA.raw.fred.inflation.toFixed(1) + '%', s: DATA.components.Inflation },
+            { l: 'Momentum (S&P 500)', v: (DATA.raw.market.momentum.SPY * 100).toFixed(1) + '%', s: DATA.components.Momentum }
+        ];
+        document.getElementById('pulse').innerHTML = pulseItems.map(i => `
+            <div class="flex justify-between items-center py-2 border-b border-white/5 last:border-0">
+                <span class="text-white/70">${i.s > 0.2 ? '🟢' : (i.s < -0.2 ? '🔴' : '🟡')} ${i.l}</span>
+                <span class="font-bold text-lg font-mono">${i.v}</span>
+            </div>
+        `).join('');
+        document.getElementById('funds').innerText = DATA.raw.fred.fed_funds.toFixed(2) + '%';
+    </script>
+</body>
+
+</html>
