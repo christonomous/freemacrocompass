@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Macro Terminal | Revoro Alpha</title>
+    <meta name="theme-color" content="#020408">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/logo.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Global Macro Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <link
@@ -75,7 +80,7 @@
             class="flex flex-col md:flex-row justify-between items-start md:items-center glass p-6 rounded-2xl border-white/5 space-y-4 md:space-y-0">
             <div>
                 <div class="flex items-center space-x-3">
-                    <img src="https://revoro.consulting/logo_light.svg" class="h-10 w-auto" alt="Revoro Logo">
+                    <img src="/logo.svg" class="h-10 w-auto" alt="Revoro Logo">
                     <h1 class="text-2xl font-mono font-bold tracking-tighter text-white">GLOBAL MACRO TERMINAL <span
                             class="text-terminal-accent">v2.6</span></h1>
                 </div>
@@ -647,7 +652,18 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', initDashboard);
+        document.addEventListener('DOMContentLoaded', () => {
+            initDashboard();
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').then(reg => {
+                        console.log('SW registered:', reg);
+                    }).catch(err => {
+                        console.log('SW registration failed:', err);
+                    });
+                });
+            }
+        });
     </script>
 </body>
 

@@ -1,0 +1,20 @@
+{
+    "name": "Global Macro Terminal",
+    "short_name": "Macro Terminal",
+    "description": "Institutional-grade macro data terminal"display": "standalone",
+    "background_color": "#020408",
+    "theme_color": "#020408",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/logo.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}
