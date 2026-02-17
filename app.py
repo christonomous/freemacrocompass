@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, jsonify, send_file
+from flask import Flask, render_template_string, jsonify, send_file, send_from_directory
 from data_engine import MacroEngine
 import json
 import os
@@ -9,6 +9,10 @@ engine = MacroEngine()
 @app.route('/')
 def home():
     return send_file('index.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('.', filename)
 
 @app.route('/api/macro')
 def get_macro_data():
