@@ -292,25 +292,7 @@
                 }).render();
 
                 // --- RADAR DYNAMIC SUMMARY ---
-                const radarEntries = Object.entries(DATA.components).sort((a, b) => b[1] - a[1]);
-                const dominantPillar = radarEntries[0];
-                const weakestPillar = radarEntries[radarEntries.length - 1];
-
-                let radarConclusion = "";
-                if (dominantPillar[0] === 'Liquidity' || dominantPillar[0] === 'Monetary') {
-                    radarConclusion = "Market is heavily liquidity-driven. Systemic plumbing and central bank posture are the primary anchors of the current regime, overriding fundamental growth concerns.";
-                } else if (dominantPillar[0] === 'Appetite' || dominantPillar[0] === 'Sentiment') {
-                    radarConclusion = "Animal spirits are in control. Risk appetite and speculative sentiment are the main engines of price action, reflecting high institutional confidence.";
-                } else if (dominantPillar[0] === 'Growth') {
-                    radarConclusion = "Fundamentals are leading the charge. Strong economic growth signals are the primary driver, suggesting a healthy expansionary phase.";
-                } else if (dominantPillar[0] === 'Credit') {
-                    radarConclusion = "Credit markets are providing the tailwind. Tightening spreads and robust financial conditions are supporting broad market stability.";
-                }
-
-                if (weakestPillar[1] < -0.3) {
-                    radarConclusion += ` However, ${weakestPillar[0]} represents a significant point of friction that could challenge the current trend.`;
-                }
-
+                const radar = DATA.summaries.radar;
                 document.getElementById('radar-summary').innerHTML = `
                     <div class="p-3 rounded-xl border border-white/5 bg-white/[0.02]">
                         <div class="flex items-center space-x-2 mb-2">
@@ -318,7 +300,7 @@
                             <span class="text-[9px] font-mono text-terminal-muted uppercase tracking-widest">Strategic Pulse</span>
                         </div>
                         <p class="text-[10px] font-sans text-white/70 leading-relaxed">
-                            <span class="text-terminal-accent font-bold">PRIMARY DRIVER: ${dominantPillar[0].toUpperCase()}</span>. ${radarConclusion}
+                            <span class="text-terminal-accent font-bold">PRIMARY DRIVER: ${radar.driver}</span>. ${radar.conclusion}
                         </p>
                     </div>
                 `;
@@ -347,36 +329,7 @@
                 `).join('');
 
                 // --- PLUMBING DYNAMIC SUMMARY ---
-                let plumbingConclusion = "";
-                let plumbingStatus = "STABLE";
-                let plumbingColor = "text-terminal-accent";
-
-                // Heuristic for systemic stress (higher is worse)
-                const stressScore = (
-                    (fred.hy_spread / 5) * 0.4 +
-                    ((fred.stress_index + 1) / 3) * 0.3 +
-                    (DATA.raw.market.tlt_vol / 20) * 0.3
-                );
-
-                if (stressScore > 0.7) {
-                    plumbingConclusion = "Systemic plumbing is showing critical stress. Elevated credit spreads and high bond volatility suggest institutional liquidity is tightening, creating a high-risk environment for leveraged positions.";
-                    plumbingStatus = "CRITICAL";
-                    plumbingColor = "text-terminal-bearish";
-                } else if (stressScore > 0.4) {
-                    plumbingConclusion = "Caution: Systemic tension is rising. Credit markets are pricing in increased risk, and volatility in the rates market is exerting pressure on overall financial stability.";
-                    plumbingStatus = "CAUTION";
-                    plumbingColor = "text-yellow-500";
-                } else if (fred.yield_10y3m < -0.1) {
-                    plumbingConclusion = "Monetary structure remains restrictive. The yield curve inversion highlights persistent recessionary signals despite relatively calm credit markets.";
-                    plumbingStatus = "RESTRICTIVE";
-                } else if (stressScore < 0.25 && fred.nfci < -0.5) {
-                    plumbingConclusion = "Systemic plumbing is highly accommodative. Low stress markers and loose financial conditions provide a supportive backdrop for risk-asset expansion.";
-                    plumbingStatus = "ACCOMMODATIVE";
-                    plumbingColor = "text-terminal-bullish";
-                } else {
-                    plumbingConclusion = "Systemic pulse is currently neutral. Financial conditions are in equilibrium, without immediate signs of liquidity distress or extreme accommodation.";
-                }
-
+                const plumbing = DATA.summaries.plumbing;
                 document.getElementById('plumbing-summary').innerHTML = `
                     <div class="p-4 rounded-xl border border-white/5 bg-terminal-accent/5 backdrop-blur-sm relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-3 opacity-10">
@@ -385,10 +338,10 @@
                         <div class="flex items-center space-x-3 mb-2">
                             <span class="text-[10px] font-mono text-terminal-muted uppercase tracking-[0.2em]">Institutional Systemic Pulse</span>
                             <span class="h-px flex-1 bg-white/5"></span>
-                            <span class="text-[10px] font-mono font-bold ${plumbingColor} uppercase">${plumbingStatus}</span>
+                            <span class="text-[10px] font-mono font-bold ${plumbing.color} uppercase">${plumbing.status}</span>
                         </div>
                         <p class="text-xs font-sans text-white/90 leading-relaxed italic pr-12">
-                            "${plumbingConclusion}"
+                            "${plumbing.conclusion}"
                         </p>
                     </div>
                 `;
@@ -412,100 +365,43 @@
                 document.getElementById('spy-mom-bar').style.width = Math.min(100, Math.max(0, (spyMom + 5) / 10 * 100)) + '%';
 
                 // --- GROWTH & MOMENTUM DYNAMIC SUMMARY ---
-                let growthConclusion = "";
-                let growthStatus = "NEUTRAL";
-                let growthColor = "text-terminal-accent";
-
-                if (cgMomRaw > 1 && rotVal > 1) {
-                    growthConclusion = "Strong economic acceleration signaling. Expansionary leadership in industrial commodities and high-beta tech sectors suggests a robust cyclical uptrend.";
-                    growthStatus = "EXPANSION";
-                    growthColor = "text-terminal-bullish";
-                } else if (cgMomRaw < -1 && rotVal < -1) {
-                    growthConclusion = "Signs of economic cooling or contraction. Defensive rotation and safe-haven demand (Gold) indicate institutional positioning for a growth slowdown or recessionary risk.";
-                    growthStatus = "CONTRACTION";
-                    growthColor = "text-terminal-bearish";
-                } else if (cgMomRaw > 1 && rotVal < -1) {
-                    growthConclusion = "Divergent growth signals. While industrial demand (Copper) remains firm, equity markets are rotating defensively. This typically precedes a broader structural transition.";
-                    growthStatus = "DIVERGING";
-                } else if (cgMomRaw < -1 && rotVal > 1) {
-                    growthConclusion = "Liquidity-driven expansion. Weak industrial momentum but strong speculative tech rotation suggests market growth is being fueled more by liquidity than fundamental expansion.";
-                    growthStatus = "LIQUIDITY-DRIVEN";
-                } else {
-                    growthConclusion = "Equilibrium regime. Growth signals are currently balanced without extreme directional bias in leading economic indicators.";
-                }
-
+                const growth = DATA.summaries.growth;
                 document.getElementById('growth-summary').innerHTML = `
                     <div class="p-4 rounded-xl border border-white/5 bg-white/[0.02] relative overflow-hidden">
                         <div class="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
                             <span class="text-[10px] font-mono text-terminal-muted uppercase tracking-widest">Growth Signal</span>
-                            <span class="text-[10px] font-mono ${growthColor} font-bold px-2 py-0.5 border border-current/20 rounded">${growthStatus}</span>
+                            <span class="text-[10px] font-mono ${growth.color} font-bold px-2 py-0.5 border border-current/20 rounded">${growth.status}</span>
                         </div>
                         <p class="text-[11px] font-sans text-white/80 leading-relaxed italic">
-                            "${growthConclusion}"
+                            "${growth.conclusion}"
                         </p>
                     </div>
                 `;
 
                 // --- DYNAMIC SUMMARIZATION ---
-                const rawMom = rawMkt.momentum;
-                const assetNames = {
-                    'SPY': 'S&P 500',
-                    'GLD': 'Gold',
-                    'HG=F': 'Copper',
-                    'DX-Y.NYB': 'US Dollar',
-                    'TLT': 'Long-Term Bonds',
-                    'XLK': 'Technology',
-                    'XLP': 'Consumer Staples'
-                };
-
-                const sortedMom = Object.entries(rawMom).sort((a, b) => b[1] - a[1]);
-                const leader = sortedMom[0];
-                const laggard = sortedMom[sortedMom.length - 1];
-                const positiveBreadth = (Object.values(rawMom).filter(v => v > 0).length / Object.keys(rawMom).length) * 100;
-
-                let conclusion = "";
-                let conclusionColor = "text-terminal-accent";
-
-                if (leader[0] === 'XLK' || (leader[0] === 'SPY' && rawMom['XLK'] > 0)) {
-                    conclusion = "Market exhibiting strong Risk-On expansion. Technology leads the momentum sequence, suggesting high institutional risk appetite and growth-oriented capital allocation.";
-                    conclusionColor = "text-terminal-bullish";
-                } else if (leader[0] === 'GLD' || (leader[0] === 'TLT' && rawMom['GLD'] > 0)) {
-                    conclusion = "Defensive rotation detected. Leadership in Gold and Bonds indicates a 'Flight to Quality' regime, often preceding volatility or reflecting macro-uncertainty.";
-                    conclusionColor = "text-terminal-bearish";
-                } else if (leader[0] === 'DX-Y.NYB') {
-                    conclusion = "Dollar strength is dominating the cross-asset landscape. This typically exerts downward pressure on global liquidity and suggests a 'Cash is King' defensive posture.";
-                    conclusionColor = "text-terminal-bearish";
-                } else if (leader[0] === 'HG=F') {
-                    conclusion = "Industrial momentum is leading. Strong Copper performance relative to Gold suggests professional expectations of a cyclical economic recovery and industrial expansion.";
-                    conclusionColor = "text-terminal-bullish";
-                } else if (rawMom['XLP'] > rawMom['XLK'] && rawMom['XLP'] > 0) {
-                    conclusion = "Late-cycle defensive positioning. Consumer Staples are outperforming Tech, signaling an institutional shift toward stable yield and recession-resistant sectors.";
-                } else {
-                    conclusion = "Market is in an undecisive structural transition. Momentum is fragmented across asset classes without a clear directional theme or sector leadership.";
-                }
-
+                const momentum = DATA.summaries.momentum;
                 document.getElementById('momentum-summary').innerHTML = `
                     <div class="p-5 rounded-xl border border-white/5 bg-white/[0.02] relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-1 h-full ${leader[1] > 0 ? 'bg-terminal-bullish' : 'bg-terminal-bearish'}"></div>
+                        <div class="absolute top-0 left-0 w-1 h-full ${momentum.leader_color}"></div>
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div class="flex-1">
                                 <div class="flex items-center space-x-2 mb-2">
                                     <span class="text-[10px] font-mono text-terminal-accent font-bold uppercase tracking-widest">Decision Narrative</span>
                                     <span class="h-px w-8 bg-white/10"></span>
-                                    <span class="text-[10px] font-mono text-terminal-muted uppercase">Breadth: ${positiveBreadth.toFixed(0)}% Bullish</span>
+                                    <span class="text-[10px] font-mono text-terminal-muted uppercase">Breadth: ${momentum.breadth.toFixed(0)}% Bullish</span>
                                 </div>
                                 <p class="text-sm font-sans text-white/90 leading-relaxed italic border-l-2 border-terminal-accent/20 pl-4 py-1">
-                                    "${conclusion}"
+                                    "${momentum.conclusion}"
                                 </p>
                             </div>
                             <div class="flex flex-col space-y-3 min-w-[200px] border-l border-white/5 pl-6">
                                 <div>
                                     <p class="text-[9px] font-mono text-terminal-muted uppercase">Alpha Leader</p>
-                                    <p class="text-xs font-mono font-bold text-terminal-bullish">${assetNames[leader[0]] || leader[0]} <span class="ml-1 opacity-70">(+${(leader[1] * 100).toFixed(2)}%)</span></p>
+                                    <p class="text-xs font-mono font-bold text-terminal-bullish">${momentum.leader.name} <span class="ml-1 opacity-70">(+${(momentum.leader.val * 100).toFixed(2)}%)</span></p>
                                 </div>
                                 <div>
                                     <p class="text-[9px] font-mono text-terminal-muted uppercase">Relative Laggard</p>
-                                    <p class="text-xs font-mono font-bold text-terminal-bearish">${assetNames[laggard[0]] || laggard[0]} <span class="ml-1 opacity-70">(${(laggard[1] * 100).toFixed(2)}%)</span></p>
+                                    <p class="text-xs font-mono font-bold text-terminal-bearish">${momentum.laggard.name} <span class="ml-1 opacity-70">(${(momentum.laggard.val * 100).toFixed(2)}%)</span></p>
                                 </div>
                             </div>
                         </div>
@@ -571,56 +467,28 @@
                 const corel = rawMkt.correlation;
 
                 // --- CORRELATION DYNAMIC SUMMARY ---
+                const corr = DATA.summaries.correlation;
                 if (assets.length > 0 && corel['SPY']) {
-                    let pairs = [];
-                    assets.forEach((r, i) => {
-                        assets.forEach((c, j) => {
-                            if (i < j) { // Only unique pairs, exclude identity
-                                pairs.push({ p: [r, c], v: corel[r][c] || 0 });
-                            }
-                        });
-                    });
-
-                    const sortedPairs = [...pairs].sort((a, b) => b.v - a.v);
-                    const strongestPair = sortedPairs[0];
-                    const weakestPair = sortedPairs[sortedPairs.length - 1];
-                    const avgAbsCorr = pairs.reduce((acc, p) => acc + Math.abs(p.v), 0) / pairs.length;
-
-                    let corrConclusion = "";
-                    if (avgAbsCorr > 0.6) {
-                        corrConclusion = "Strong Systemic Tie-In. High correlation across all asset classes indicates a macro-dominated environment where 'Everything is one trade' (likely Liquidity or Dollar driven).";
-                    } else if (avgAbsCorr < 0.3) {
-                        corrConclusion = "High Market Dispersion. Assets are moving independently, suggesting a stock-picker's market with idiosyncratic sector rotations and low systemic stress.";
-                    } else {
-                        corrConclusion = "Balanced Structural Alignment. Standard correlation levels suggest normal market functioning without extreme systemic synchronization.";
-                    }
-
-                    // Check for key hedges
-                    const spyGld = corel['SPY'] && corel['SPY']['GLD'] !== undefined ? corel['SPY']['GLD'] : 0;
-                    if (spyGld < -0.4) {
-                        corrConclusion += " Notable active hedge between Equities and Gold.";
-                    }
-
                     document.getElementById('correlation-summary').innerHTML = `
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border border-white/5 bg-white/[0.02] rounded-xl p-4">
                             <div class="md:col-span-2">
                                 <span class="text-[10px] font-mono text-terminal-accent uppercase tracking-widest mb-2 block">Alignment Insight</span>
                                 <p class="text-xs font-sans text-white/80 leading-relaxed italic border-l-2 border-terminal-accent/30 pl-3">
-                                    "${corrConclusion}"
+                                    "${corr.conclusion}"
                                 </p>
                             </div>
                             <div class="flex flex-col justify-center space-y-2 border-t md:border-t-0 md:border-l border-white/5 pt-3 md:pt-0 md:pl-4">
                                 <div class="flex justify-between items-center text-[9px] font-mono">
                                     <span class="text-terminal-muted uppercase">Tightest Coupling</span>
-                                    <span class="text-terminal-bullish font-bold">${strongestPair.p.join('/')} (${strongestPair.v.toFixed(2)})</span>
+                                    <span class="text-terminal-bullish font-bold">${corr.strongest.pair} (${corr.strongest.val.toFixed(2)})</span>
                                 </div>
                                 <div class="flex justify-between items-center text-[9px] font-mono">
                                     <span class="text-terminal-muted uppercase">Max Decoupling</span>
-                                    <span class="text-terminal-bearish font-bold">${weakestPair.p.join('/')} (${weakestPair.v.toFixed(2)})</span>
+                                    <span class="text-terminal-bearish font-bold">${corr.weakest.pair} (${corr.weakest.val.toFixed(2)})</span>
                                 </div>
                                 <div class="flex justify-between items-center text-[9px] font-mono">
                                     <span class="text-terminal-muted uppercase">Systemic Tension</span>
-                                    <span class="text-white font-bold">${(avgAbsCorr * 10).toFixed(1)}/10</span>
+                                    <span class="text-white font-bold">${corr.tension.toFixed(1)}/10</span>
                                 </div>
                             </div>
                         </div>
